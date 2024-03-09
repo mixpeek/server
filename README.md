@@ -1,4 +1,4 @@
-<img width="326" alt="Group 311 (2)" src="https://mixpeek.com/static/img/logo-light.png">
+<img width="326" alt="Group 311 (2)" src="https://mixpeek.com/static/img/logo-dark.png">
 
 # Multimodal RAG Framework
 ---
