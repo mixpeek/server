@@ -1,23 +1,32 @@
-[![Slack](https://img.shields.io/badge/slack-@mixpeek/dev-green.svg?logo=slack)](https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A)
- **[Docs](https://docs.mixpeek.com/)** | **[Free account](https://dashboard.mixpeek.com)** | **[Email list](https://www.mixpeek.com/newsletter-signup/)**
-
+<p align="center">
+  <img height="60" src="https://mixpeek.com/static/img/logo-dark.png" alt="Mixpeek Logo">
+</p>
+<p align="center">
+<strong><a href="https://dashboard.mixpeek.com">Sign Up</a> | <a href="https://docs.mixpeek.com/">Documentation</a> | <a href="https://www.mixpeek.com/newsletter-signup/">Email List</a> | <a href="https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A">Slack</a>
+</strong>
+</p>
 
 <p align="center">
-    <img src ="https://mixpeek.com/static/img/logo-dark.png"
-     width="250"/>
-         </p>
+    <a href="https://github.com/mixpeek/mixpeek-python/stargazers">
+        <img src="https://img.shields.io/github/stars/mixpeek/mixpeek-python.svg?style=flat&color=yellow" alt="Github stars"/>
+    </a>
+    <a href="https://github.com/mixpeek/mixpeek-python/issues">
+        <img src="https://img.shields.io/github/issues/mixpeek/mixpeek-python.svg?style=flat&color=success" alt="GitHub issues"/>
+    </a>
+    <a href="https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A">
+        <img src="https://img.shields.io/badge/slack-join-green.svg?logo=slack" alt="Join Slack"/>
+    </a>
+</p>
 
-### Integrate a fully extensible RAG pipeline in minutes 
+<h2 align="center">
+    <b>Mixpeek is a framework for building and deploying retrieval and generation pipelines.</b>
+</h2>
 
----
-
-Mixpeek is an open source framework for chunking, indexing, embedding, querying, generating, and fine-tuning RAG (Retrieval Augmented Generation) pipelines. 
-
-It supports video, audio, image and text files is extremely simple to use and is built to be extensible for any data source and model.
+<!-- ![Mixpeek Logo](https://mixpeek.com/static/img/logo-dark.png) -->
 
 ## Quickstart
 
-The description below use Mixpeek's [python client](https://github.com/mixpeek/mixpeek-python). For examples interfacing with the Mixpeek api directly, see [examples](/examples).
+The guide below use Mixpeek's [python client](https://github.com/mixpeek/mixpeek-python). For examples interfacing with the Mixpeek api directly, see [examples](/examples).
 
 **Import and initialize the client**
 
