@@ -21,20 +21,14 @@ It supports video, audio, image and text files is extremely simple to use and is
 from mixpeek import Mixpeek
 from pydantic import BaseModel
 
-# initiatlize mixpeek client using a collection_id tenant
+# initiatlize mixpeek client
 client = Mixpeek(
-    collection_id="1",
     connection={
         "storage": "mongodb",
         "connection_string": "mongodb+srv://username:password@hostname",
         "database": "files",
         "collection": "resumes",
-    },
-    embedding_model={
-        "name": "all-MiniLM-L6-v2",
-        "version": "latest",
-    },  # optional
-    embed_suffix="embedding",  # optional
+    }
 )
 ```
 
@@ -51,17 +45,13 @@ class StorageModel(BaseModel):
 index_id = client.index(
     input=[
         "https://nux-sandbox.s3.us-east-2.amazonaws.com/marketing/ethan-resume.pdf"
-    ],  # one or the other (existing db)
-    # input={
-    #     "filter": {"collection_id": "1"},
-    #     "upsert": True,
-    # }
+    ],
     data_model={
         "schema": StorageModel.to_dict(),  # optional
         "fields_to_embed": [
             "raw_content",
             "file_metadata.name",
-        ],  # these are placed beside them?
+        ],
         "metadata": {
             "name": "Ethan's Resume",
         },
@@ -79,7 +69,7 @@ embedding = client.embed(input=query)
 # retrieve the results
 results = client.retrieve(
     query={
-        "file_metadata.embedding": query,  # detect if embedding is in it
+        "file_metadata.embedding": query,
         "file_metadata.name": "Ethan's Resume",
     },
     filters={"collection_id": "1"},
@@ -92,7 +82,6 @@ results = client.retrieve(
 class UserModel(BaseModel):
     name: str
     age: int
-
 
 # generate a response with context from results
 generation = client.generate.openai.chat(
