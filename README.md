@@ -1,4 +1,4 @@
-[![Slack](https://img.shields.io/badge/slack-@mixpeek/dev-green.svg?logo=slack)](https://join.slack.com/t/mixpeek/shared_invite/enQtNjQxMzgyNTEzNzk1LTU0ZjZlZmY5ODdkOTEzZDQzZWU5OTk3ZTgyNjY1ZDE1M2U1ZTViMWQxMThiMjU1N2MwOTlhMmVjYjEzMjEwMGQ)
+[![Slack](https://img.shields.io/badge/slack-@mixpeek/dev-green.svg?logo=slack)](https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A)
  **[Docs](https://docs.mixpeek.com/)** | **[Free account](https://dashboard.mixpeek.com)** | **[Email list](https://www.mixpeek.com/newsletter-signup/)**
 
 
@@ -15,48 +15,34 @@ Mixpeek is an open source framework for chunking, indexing, embedding, querying,
 
 It supports video, audio, image and text files is extremely simple to use and is built to be extensible for any data source and model.
 
+## Quickstart
+
+The description below use Mixpeek's [python client](https://github.com/mixpeek/mixpeek-python). For examples interfacing with the Mixpeek api directly, see [examples](/examples).
+
 **Import and initialize the client**
 
 ```python
 from mixpeek import Mixpeek
-from pydantic import BaseModel
 
-# initiatlize mixpeek client
+# initialize the connection (everything is encrypted)
 client = Mixpeek(
     connection={
-        "storage": "mongodb",
+        "engine": "mongodb",
         "connection_string": "mongodb+srv://username:password@hostname",
         "database": "files",
         "collection": "resumes",
     }
 )
+
+# create your first collection
+collection_id = client.create_collection()
 ```
 
 **Configure and initiate the indexing worker**
 
 ```python
-# Define how you'd like to index the content
-class StorageModel(BaseModel):
-    file_metadata: dict
-    raw_content: str
-
-
-# Index file urls, raw string, or byte objects. Returns a unique id for the index.
-index_id = client.index(
-    input=[
-        "https://nux-sandbox.s3.us-east-2.amazonaws.com/marketing/ethan-resume.pdf"
-    ],
-    data_model={
-        "schema": StorageModel.to_dict(),  # optional
-        "fields_to_embed": [
-            "raw_content",
-            "file_metadata.name",
-        ],
-        "metadata": {
-            "name": "Ethan's Resume",
-        },
-    },
-)
+# Index file urls, raw string, or byte objects. 
+index_id = client.index(["https://s3.us-east-2.amazonaws.com/resume.pdf"])
 ```
 
 **Retrieve results using KNN**
@@ -69,10 +55,9 @@ embedding = client.embed(input=query)
 # retrieve the results
 results = client.retrieve(
     query={
-        "file_metadata.embedding": query,
-        "file_metadata.name": "Ethan's Resume",
+        "corpus.embedding": query
     },
-    filters={"collection_id": "1"},
+    filters={"collection_id": collection_id},
 )
 ```
 
@@ -144,6 +129,7 @@ Handles the generation and fine-tuning of content based on the indexed data.
 
 Future enhancements planned for OSS Mixpeek:
 
+- [ ] CDC connection with databases for real-time sync
 - [ ] Fine-tuning support for BERT encoders and LoRa adapters.
 - [ ] Integration with hybrid databases (Weaviate, Qdrant, and Redis).
 - [ ] Multimodal querying & generation
@@ -159,6 +145,7 @@ Future enhancements planned for OSS Mixpeek:
 For those interested in a fully managed hosting solution:
 
 - **Full Dashboard**: Provision collections, A/B test queries, revision history, rollbacks and more
+- **Serverless**: For hosting the indexing and querying jobs
 - **Monitoring**: Full visibility into indexing, retrieval and generation performance
 - **Compliance Checks**: Ensuring that your data handling meets regulatory standards (HIPAA, SOC-2, etc.)
 - **Support**: 24 hour SLA 
@@ -168,4 +155,5 @@ For those interested in a fully managed hosting solution:
 
 ### Pricing
 
-$1.00 per GB per month with discounts for upfront commitments.
+- First 10 GB free
+- $1.00 per GB per month with discounts for upfront commitments.
