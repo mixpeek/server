@@ -2,19 +2,19 @@ from mixpeek import Mixpeek
 from pydantic import BaseModel
 
 # initiatlize mixpeek client using a collection_id tenant
-collection_id = "1"
 client = Mixpeek(
     collection_id="1",
-    engine="mongodb",
     connection={
+        "storage": "mongodb",
         "connection_string": "mongodb+srv://username:password@hostname",
         "database": "files",
         "collection": "resumes",
     },
     embedding_model={
-        "name": "sentence-transformers/all-MiniLM-L6-v2",
+        "name": "all-MiniLM-L6-v2",
         "version": "latest",
-    },
+    },  # optional
+    embed_suffix="embedding",  # optional
 )
 
 
@@ -26,22 +26,25 @@ class StorageModel(BaseModel):
 
 # Index file urls, raw string, or byte objects. Returns a unique id for the index.
 index_id = client.index(
-    input=["https://nux-sandbox.s3.us-east-2.amazonaws.com/marketing/ethan-resume.pdf"],
-    chunker={
-        "method": "character",
-        "length": 1000,
-        "seperator": "\n\n",
-        "chunk_overlap": 100,
-    },
+    input=[
+        "https://nux-sandbox.s3.us-east-2.amazonaws.com/marketing/ethan-resume.pdf"
+    ],  # one or the other (existing db)
+    # input={
+    #     "filter": {"collection_id": "1"},
+    #     "upsert": True,
+    # }
     data_model={
-        "model": StorageModel,
-        "fields_to_embed": ["raw_content"],
-        "embed_suffix": "embedding_field",
+        "schema": StorageModel.to_dict(),  # optional
+        "fields_to_embed": [
+            "raw_content",
+            "file_metadata.name",
+        ],  # these are placed beside them?
         "metadata": {
             "name": "Ethan's Resume",
         },
     },
 )
+# this should also create the mongo index.
 
 # Generate embedding
 query = "What was Ethan's first job?"
@@ -49,20 +52,11 @@ embedding = client.embed(input=query)
 
 # retrieve the results
 results = client.retrieve(
-    query=[
-        {
-            "$vectorSearch": {
-                "index": "default",
-                "path": f"{StorageModel.raw_content}.embedding_field",
-                "queryVector": embedding,
-                "numCandidates": 150,
-                "limit": 10,
-                "filter": {
-                    "$gt": {"collection_id": collection_id, "index_id": index_id}
-                },
-            }
-        }
-    ],
+    query={
+        "file_metadata.embedding": query,  # detect if embedding is in it
+        "file_metadata.name": "Ethan's Resume",
+    },
+    filters={"collection_id": "1"},
 )
 
 
@@ -73,7 +67,7 @@ class UserModel(BaseModel):
 
 
 # generate a response with context from results
-generation = client.openai.chat.generate(
+generation = client.generate.openai.chat(
     engine="gpt-3.5-turbo",
     response_shape=UserModel,
     context=f"Content from resume: {results}",
