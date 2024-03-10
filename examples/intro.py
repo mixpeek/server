@@ -3,7 +3,6 @@ from pydantic import BaseModel
 
 # initiatlize mixpeek client using a collection_id tenant
 client = Mixpeek(
-    collection_id="1",
     connection={
         "storage": "mongodb",
         "connection_string": "mongodb+srv://username:password@hostname",
@@ -13,8 +12,8 @@ client = Mixpeek(
     embedding_model={
         "name": "all-MiniLM-L6-v2",
         "version": "latest",
-    },  # optional
-    embed_suffix="embedding",  # optional
+    },
+    embed_suffix="embedding",
 )
 
 
@@ -27,18 +26,15 @@ class StorageModel(BaseModel):
 # Index file urls, raw string, or byte objects. Returns a unique id for the index.
 index_id = client.index(
     input=[
-        "https://nux-sandbox.s3.us-east-2.amazonaws.com/marketing/ethan-resume.pdf"
-    ],  # one or the other (existing db)
-    # input={
-    #     "filter": {"collection_id": "1"},
-    #     "upsert": True,
-    # }
+        "https://nux-sandbox.s3.us-east-2.amazonaws.com/marketing/ethan-resume.pdf",
+    ],
+    upsert={"collection_id": "1"},
     data_model={
         "schema": StorageModel.to_dict(),  # optional
         "fields_to_embed": [
             "raw_content",
             "file_metadata.name",
-        ],  # these are placed beside them?
+        ],
         "metadata": {
             "name": "Ethan's Resume",
         },
