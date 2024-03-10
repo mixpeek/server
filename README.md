@@ -154,7 +154,7 @@ Future enhancements planned for OSS Mixpeek:
 - [ ] Learn to Rank (LTR) and re-ranking features.
 
 
-## Public Cloud
+## Managed Version
 
 For those interested in a fully managed hosting solution:
 
