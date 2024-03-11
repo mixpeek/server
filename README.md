@@ -154,7 +154,7 @@ Future enhancements planned for OSS Mixpeek:
 For those interested in a fully managed hosting solution:
 
 - **Full Dashboard**: Provision collections, A/B test queries, revision history, rollbacks and more
-- **Serverless**: For hosting the indexing and querying jobs
+- **Serverless Flows**: For hosting the indexing and querying workflows
 - **Monitoring**: Full visibility into indexing, retrieval and generation performance
 - **Compliance Checks**: Ensuring that your data handling meets regulatory standards (HIPAA, SOC-2, etc.)
 - **Support**: 24 hour SLA 
