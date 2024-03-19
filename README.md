@@ -1,19 +1,19 @@
 <p align="center">
-  <img height="60" src="https://nux.ai/static/img/brand/nux_logo_dark.png" alt="NUX Logo">
+  <img height="60" src="https://mixpeek.com/static/img/logo-dark.png" alt="Mixpeek Logo">
 </p>
 <p align="center">
-<strong><a href="https://docs.nux.ai/">Documentation</a> | <a href="https://www.nux.ai/newsletter-signup/">Email List</a>
+<strong><a href="https://dashboard.mixpeek.com">Sign Up</a> | <a href="https://docs.mixpeek.com/">Documentation</a> | <a href="https://www.mixpeek.com/newsletter-signup/">Email List</a> | <a href="https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A">Slack</a>
 </strong>
 </p>
 
 <p align="center">
-    <a href="https://github.com/nux-ai/server/stargazers">
-        <img src="https://img.shields.io/github/stars/nux-ai/server.svg?style=flat&color=yellow" alt="Github stars"/>
+    <a href="https://github.com/mixpeek/mixpeek-python/stargazers">
+        <img src="https://img.shields.io/github/stars/mixpeek/mixpeek-python.svg?style=flat&color=yellow" alt="Github stars"/>
     </a>
-    <a href="https://github.com/nux-ai/server/issues">
-        <img src="https://img.shields.io/github/issues/nux-ai/server.svg?style=flat&color=success" alt="GitHub issues"/>
+    <a href="https://github.com/mixpeek/mixpeek-python/issues">
+        <img src="https://img.shields.io/github/issues/mixpeek/mixpeek-python.svg?style=flat&color=success" alt="GitHub issues"/>
     </a>
-    <a href="https://join.slack.com/t/nuxai/shared_invite/zt-2efp37o7q-FDyH3LFPkeOsc9Vi_Q6ZEA">
+    <a href="https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A">
         <img src="https://img.shields.io/badge/slack-join-green.svg?logo=slack" alt="Join Slack"/>
     </a>
 </p>
