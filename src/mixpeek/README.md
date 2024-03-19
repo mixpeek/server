@@ -44,13 +44,13 @@ Docs are at `/docs`,
 
 ## Docker Commands:
 
-docker build --platform linux/amd64 -t nux/nux-server-api:latest .
+docker build --platform linux/amd64 -t mixpeek/mixpeek-server:latest .
 
-docker run -p 8002:8002 nux/nux-server-api:latest
+docker run -p 8000:8000 mixpeek/mixpeek-server:latest
 
 
 ## push to gh
 
-docker tag nux/nux-server-api:latest ghcr.io/nux-ai/nux-server-api:latest
+docker tag mixpeek/mixpeek-server:latest ghcr.io/mixpeek/mixpeek-server:latest
 
-docker push ghcr.io/nux-ai/nux-server-api:latest
+docker push ghcr.io/mixpeek/mixpeek-server:latest
