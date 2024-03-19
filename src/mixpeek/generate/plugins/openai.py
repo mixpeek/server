@@ -132,7 +132,6 @@ class GPT:
         except NotFoundError as e:
             raise UnsupportedModelVersionError()
         except Exception as e:
-            print(e)
             raise ModelExecutionError()
 
         return response_object

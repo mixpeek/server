@@ -33,19 +33,13 @@ class ParseHandler:
                     if not filename:
                         filename = generate_filename_from_url(self.file_url)
                     else:
-                        raise ValueError("Filename not found")
+                        raise BadRequestError(error={"message": "Filename not found"})
                     return response.content, filename
                 else:
-                    raise BadRequestError(
-                        error={
-                            "message": f"Error downloading file: {response.status_code}"
-                        }
-                    )
+                    raise BadRequestError(error={"message": "Error downloading file"})
 
         except Exception as e:
-            raise BadRequestError(
-                error={"message": f"Error downloading file: {response.status_code}"}
-            )
+            raise BadRequestError(error={"message": "Error downloading file"})
 
     def detect_filetype(self, contents):
         try:

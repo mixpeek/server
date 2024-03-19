@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, Body, Depends, Request, Path
+from fastapi import APIRouter, Request
+from _exceptions import BadRequestError, InternalServerError, NotFoundError
 from typing import Optional, Dict, Any
 
 
@@ -17,5 +18,9 @@ async def parse_file(
     parse_handler = ParseHandler(parser_request.file_url)
     try:
         return await parse_handler.parse(should_chunk)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
