@@ -1,0 +1,41 @@
+name: Build and Push Docker images
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: docker/setup-buildx-action@v1
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push API Server Docker Image
+      uses: docker/build-push-action@v2
+      with:
+        context: src/mixpeek
+        file: ./src/mixpeek/Dockerfile
+        push: true
+        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-server:latest
+
+    - name: Build and push Parse Docker Image
+      uses: docker/build-push-action@v2
+      with:
+        context: src/workers
+        file: ./src/workers/Dockerfile
+        push: true
+        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-server-worker:latest

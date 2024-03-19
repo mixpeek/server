@@ -59,7 +59,7 @@ api_router.include_router(embed_router, prefix="/embed", tags=["Embedders"], dep
 @api_router.get("/", include_in_schema=False)
 def hello_world():
     return {
-        "message": "welcome to the NUX api, check out the docs for more: docs.nux.ai"
+        "message": "welcome to the Mixpeek api, check out the docs for more: docs.mixpeek.com"
     }
 
 
