@@ -10,7 +10,10 @@ from website.model import WebsiteData
 from package.model import PackageData
 from package.service import PackageManager
 
-from _exceptions import APIError
+from file.service import ParseHandler
+from file.model import ParseFileRequest
+
+from _exceptions import APIError, BadRequestError, NotFoundError, InternalServerError
 
 
 app = FastAPI()
@@ -25,6 +28,22 @@ class ApiResponse(BaseModel):
     status: str = Field(..., description="Status of the request")
     message: str = Field(..., description="Detailed message")
     data: Optional[ResponseData] = Field(None, description="Data of the response")
+
+
+@app.post("/file")
+async def parse_file(
+    parser_request: ParseFileRequest,
+    should_chunk: Optional[bool] = True,
+):
+    parse_handler = ParseHandler(parser_request.file_url)
+    try:
+        return await parse_handler.parse(should_chunk)
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
 
 
 @app.post("/website")

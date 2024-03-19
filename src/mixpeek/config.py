@@ -32,5 +32,8 @@ aws = {
     "arn_lambda": os.getenv("AWS_ARN_LAMBDA"),
 }
 
+unstructured_api_key = os.getenv("UNSTRUCTURED_API_KEY")
+unstructured_api_url = os.getenv("UNSTRUCTURED_API_URL")
+
 # local configs
 auth_off = os.getenv("AUTH_OFF", "False").lower() in ["true", "1"]

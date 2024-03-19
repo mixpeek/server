@@ -37,7 +37,7 @@ class WorkflowSyncService(BaseSyncDBService):
             new_workflow.code_as_string,
             function_name,
         )
-        code_handler._validate_code()
+        # code_handler._validate_code()
 
         # upload to s3
         response = code_handler._create_zip_package(

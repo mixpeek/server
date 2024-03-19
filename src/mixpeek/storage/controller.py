@@ -5,5 +5,4 @@ router = APIRouter()
 
 @router.post("/")
 async def insert_into_db(request: Request, data: dict = Body(...)):
-    print(data)
     return {"status": "ok"}

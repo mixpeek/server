@@ -71,7 +71,7 @@ class ParseHandler:
         metadata = self.detect_filetype(stream.getvalue())
         metadata.update({"filename": filename})
 
-        text_service = TextService(self.file_url, metadata)
+        text_service = TextService(stream, metadata)
 
         start_time = time.time() * 1000
         # Process file based on chunking preference and file type

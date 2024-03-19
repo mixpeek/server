@@ -23,15 +23,12 @@ pymongo = "4.6.0"
 boto3 = "^1.33.2"
 aioboto3 = "^12.3.0"
 openai = "^1.14.1"
-psycopg2 = "^2.9.9"
 bandit = "^1.7.8"
-tika = "^2.6.0"
-playwright = "^1.42.0"
-beautifulsoup4 = "^4.12.3"
 python-multipart = "^0.0.9"
-unstructured = {extras = ["pdf"], version = "^0.12.6"}
 instructor = "^0.6.4"
 datamodel-code-generator = "^0.25.5"
+transformers = "^4.38.2"
+torch = "^2.2.1"
 
 [build-system]
 requires = ["poetry-core"]
