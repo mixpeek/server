@@ -1,0 +1,4 @@
+unstructured==0.12.6
+magika
+fastapi
+uvicorn

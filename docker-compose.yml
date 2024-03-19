@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./src/api
+      dockerfile: Dockerfile
+    image: ghcr.io/nux-ai/nux-server-api:latest
+
+  inference:
+    build:
+      context: ./src/inference
+      dockerfile: Dockerfile
+    image: ghcr.io/nux-ai/nux-server-inference:latest
+
+  connectors:
+    build:
+      context: ./src/listeners
+      dockerfile: Dockerfile
+    image: ghcr.io/nux-ai/nux-server-listeners:latest
+  # parsers:
+  #   build:
+  #     context: ./src/parsers
+  #     dockerfile: Dockerfile
+  #   image: ghcr.io/nux-ai/nux-server-parsers:latest

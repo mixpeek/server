@@ -1,168 +1,131 @@
 <p align="center">
-  <img height="60" src="https://mixpeek.com/static/img/logo-dark.png" alt="Mixpeek Logo">
+  <img height="60" src="https://nux.ai/static/img/brand/nux_logo_dark.png" alt="NUX Logo">
 </p>
 <p align="center">
-<strong><a href="https://dashboard.mixpeek.com">Sign Up</a> | <a href="https://docs.mixpeek.com/">Documentation</a> | <a href="https://www.mixpeek.com/newsletter-signup/">Email List</a> | <a href="https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A">Slack</a>
+<strong><a href="https://docs.nux.ai/">Documentation</a> | <a href="https://www.nux.ai/newsletter-signup/">Email List</a>
 </strong>
 </p>
 
 <p align="center">
-    <a href="https://github.com/mixpeek/mixpeek-python/stargazers">
-        <img src="https://img.shields.io/github/stars/mixpeek/mixpeek-python.svg?style=flat&color=yellow" alt="Github stars"/>
+    <a href="https://github.com/nux-ai/server/stargazers">
+        <img src="https://img.shields.io/github/stars/nux-ai/server.svg?style=flat&color=yellow" alt="Github stars"/>
     </a>
-    <a href="https://github.com/mixpeek/mixpeek-python/issues">
-        <img src="https://img.shields.io/github/issues/mixpeek/mixpeek-python.svg?style=flat&color=success" alt="GitHub issues"/>
+    <a href="https://github.com/nux-ai/server/issues">
+        <img src="https://img.shields.io/github/issues/nux-ai/server.svg?style=flat&color=success" alt="GitHub issues"/>
     </a>
-    <a href="https://join.slack.com/t/mixpeek/shared_invite/zt-2edc3l6t2-H8VxHFAIl0cnpqDmyFGt0A">
+    <a href="https://join.slack.com/t/nuxai/shared_invite/zt-2efp37o7q-FDyH3LFPkeOsc9Vi_Q6ZEA">
         <img src="https://img.shields.io/badge/slack-join-green.svg?logo=slack" alt="Join Slack"/>
     </a>
 </p>
 
 <h2 align="center">
-    <b>Mixpeek is a framework for building and deploying retrieval and generation pipelines.</b>
+    <b>real-time multi-modal vector embedding pipeline. set and forget. 
+    </b>
 </h2>
 
-<!-- ![Mixpeek Logo](https://mixpeek.com/static/img/logo-dark.png) -->
+## Overview
 
-## Quickstart
+NUX automatically listens in on database changes, processes your files, and generates embeddings to send right back into your database.
 
-The guide below use Mixpeek's [python client](https://github.com/mixpeek/mixpeek-python). For examples interfacing with the Mixpeek api directly, see [examples](/examples).
+It removes the need of setting up architecture to track database changes, extracting content, processing and embedding it. This stuff doesn't move the needle in your business, so why focus on it?
 
-**Import and initialize the client**
+### Integrations
+
+- [MongoDB Vector Search](https://www.mongodb.com/products/platform/atlas-vector-search)
+- [Supabase](https://supabase.com/vector)
+
+## Services Architecture
+
+NUX is structured into four main services, each designed to handle a specific part of the process:
+
+- **API (Orchestrator)**: Coordinates the flow between services, ensuring smooth operation and handling failures gracefully.
+- **Listener**: Monitors the database for specified changes, triggering the process when changes are detected.
+- **Parser**: Loads and parses the changed files, preparing them for processing (supports image, video audio and text)
+- **Embedder**: Processes the parsed data, generating embeddings that can then be integrated back into the database.
+
+These services are containerized and can be deployed on separate servers for optimal performance and scalability.
+
+## Getting Started
+
+### Installation
+
+Clone the NUX repository and navigate to the SDK directory:
+
+```bash
+git clone git@github.com:nux-ai/server.git
+cd server
+```
+
+First, build the Docker image:
+
+```bash
+docker build -t my-app .
+```
+
+Then, run the application using Docker Compose:
+
+```bash
+docker-compose up
+```
+
+### Configuration and Usage
+
+Configure each service with your environment's specifics. Here's an illustrative setup:
 
 ```python
-from mixpeek import Mixpeek
+# Listener Service Configuration
 
-# initialize the connection (everything is encrypted)
-client = Mixpeek(
-    connection={
+listen_settings = {
+    "connection": {
         "engine": "mongodb",
-        "connection_string": "mongodb+srv://username:password@hostname",
-        "database": "files",
-        "collection": "resumes",
-    }
-)
-
-# create your first collection
-collection_id = client.create_collection()
-```
-
-**Configure and initiate the indexing worker**
-
-```python
-# Index file urls, raw string, or byte objects. 
-index_id = client.index(["https://s3.us-east-2.amazonaws.com/resume.pdf"])
-```
-
-**Retrieve results using KNN**
-
-```python
-# Generate embedding
-query = "What was Ethan's first job?"
-embedding = client.embed(input=query)
-
-# retrieve the results
-results = client.retrieve(
-    query={
-        "corpus.embedding": query
+        "dbname": "your_db_name",
+        "user": "your_db_user",
+        "password": "your_db_password",
+        "host": "your_db_host",
+        "port": 5432
     },
-    filters={"collection_id": collection_id},
-)
+    "table_name": "my_table_name"
+    "filters": {
+        "status": "processing"
+    },
+    "embedding": {
+        "model": "sentence-transformers/all-MiniLM-L6-v2",
+        "field": "file_id"
+    }
+}
 ```
 
-**Generate JSON output using context from KNN results**
+Now let's setup our listener
 ```python
-# specify json output
-class UserModel(BaseModel):
-    name: str
-    age: int
+# the schema you'd like the insert to adhere to
+class InsertSchema:
+    file_id: str
+    embedding: list
+    contents: str
 
-# generate a response with context from results
-generation = client.generate.openai.chat(
-    engine="gpt-3.5-turbo",
-    response_shape=UserModel,
-    context=f"Content from resume: {results}",
-    messages=[
-        {"role": "user", "content": query},
-    ],
-)
+from nuxai import NUX
+
+# add your internal key (or cloud if you're using our managed service)
+nux = NUX("INTERNAL-API-KEY")
+
+# add the db to your organization, it's encrypted don't worry
+collection_id = nux.add_db(LISTENER_DB_CONFIG)
+
+# now listen in on changes, that's it! 
+listener_id = nux.listen(collection_id, listen_settings)f
 ```
 
-## Folder Structure
+We can even poll for status of our listener:
 
-Mixpeek's architecture is divided into several components, each runs as seperate local web services for ease of use and deployment:
+```python
+nux.listener.status(listener_id)
 
-### Parse
-
-Handles the parsing of different file types to make them accessible for further processing.
-
-| FileType | Extensions      |
-|----------|-----------------|
-| Image    | jpg, png, etc.  |
-| Document | pdf, docx, etc. |
-| Audio    | mp3, wav, etc.  |
-
-Included parsers:
-
-- **Website Scraper**: Web scraper with recursive `depth` specification.
-- **Image**: Object detection, OCR or generating embeddings.
-- **Text**: Extracting raw text or metadata from files.
-- **Audio**: Transcribing audio or generating embeddings.
-- **Video**: Scene detection, object recognition and transcribing.
-
-### API
-
-Provides a set of APIs for interacting with the framework, including:
-
-- **Index**: Creating searchable indexes of the processed data.
-- **Chunk**: Breaking down large texts or files into independent chunks.
-- **Retrieve**: Query your storage engine of choice
-- **Generate**: Generate output based on your LLM of choice.
-- **Integrations**: 3rd party integrations for read and write support
-
-### Storage
-
-For securely storing processed data and embeddings. All storage engines support hybrid search (BM25 & KNN).
-
-- **MongoDB (Cloud Only)**: For storing indexed data and metadata.
-
-### Inference
-
-Handles the generation and fine-tuning of content based on the indexed data.
-
-- **Generate**: For generating outputs that adheres to a JSON schema
-- **Embed**: Generating embedding based on input
+{'ACTIVE': True, 'PROCESSING': 0, 'READY': 0, 'ERROR': 0}
+```
 
 
-## Roadmap
+#### Are we missing anything?
 
-Future enhancements planned for OSS Mixpeek:
+- Email: ethan@nux.ai
+- Meeting: https://nux.ai/contact
 
-- [ ] CDC connection with databases for real-time sync
-- [ ] Fine-tuning support for BERT encoders and LoRa adapters.
-- [ ] Integration with hybrid databases (Weaviate, Qdrant, and Redis).
-- [ ] Multimodal querying & generation
-- [ ] Kubernetes deployment options
-- [ ] Additional integrations (Google Drive, Box, Dropbox, etc.).
-- [ ] Support for more models (both embedding and LLMs).
-- [ ] Evaluation tools for index, query, and generate processes.
-- [ ] Learn to Rank (LTR) and re-ranking features.
-
-
-## Managed Version
-
-For those interested in a fully managed hosting solution:
-
-- **Full Dashboard**: Provision collections, A/B test queries, revision history, rollbacks and more
-- **Serverless Flows**: For hosting the indexing and querying workflows
-- **Monitoring**: Full visibility into indexing, retrieval and generation performance
-- **Compliance Checks**: Ensuring that your data handling meets regulatory standards (HIPAA, SOC-2, etc.)
-- **Support**: 24 hour SLA 
-- **User Management**: Managed OAuth 2.0, SSO, and more
-- **Audit and Access History**: Full data lineage and usage history
-- **Security**: Private endpoint, network access, and more
-
-### Pricing
-
-- First 10 GB free
-- $1.00 per GB per month with discounts for upfront commitments.
