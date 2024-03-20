@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 import logging
 
 
@@ -38,5 +39,13 @@ async def bad_request_exception_handler(request: Request, exc: BadRequestError):
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     return create_json_response(False, 422, exc.errors(), None)
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(api_router)
