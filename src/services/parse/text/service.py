@@ -29,13 +29,6 @@ class TextService:
 
     async def run(self, should_chunk=True):
         try:
-            # elements = partition_via_api(
-            #     file=self.file_stream,
-            #     api_key=unstructured_api_key,
-            #     api_url=unstructured_api_url,
-            #     metadata_filename=self.metadata["filename"],
-            # )
-
             elements = partition_pdf(
                 file=self.file_stream,
                 infer_table_structure=False,
@@ -50,7 +43,7 @@ class TextService:
             processed_chunks = self.process_chunks(chunks, should_chunk)
             return processed_chunks
         except Exception as e:
-            raise InternalServerError({"message": str(e)})
+            raise InternalServerError({"error": str(e)})
 
     def process_chunks(self, chunks, should_chunk):
         if should_chunk:
