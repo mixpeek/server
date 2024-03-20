@@ -5,6 +5,7 @@ from _exceptions import (
     UnsupportedModelVersionError,
     JSONSchemaParsingError,
     ModelExecutionError,
+    ModelResponseFormatValidationError,
     BadRequestError,
     NotFoundError,
     InternalServerError,
@@ -44,3 +45,6 @@ async def generate_orchestrator(request: GenerationRequest) -> GenerationRespons
 
     except ModelExecutionError as e:
         raise InternalServerError(error="Something went wrong when calling the model. Please try again.")
+
+    except ModelResponseFormatValidationError as e:
+        raise BadRequestError(error=str(e))

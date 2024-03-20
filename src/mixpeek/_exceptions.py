@@ -68,3 +68,12 @@ class ModelExecutionError(Exception):
     """Exception raised for errors during model execution."""
 
     pass
+
+
+class ModelResponseFormatValidationError(Exception):
+    """Exception raised for validation errors from response format."""
+
+    def __init__(self, error="", suggestion=""):
+        self.error = error
+        self.suggestion = suggestion
+        super().__init__(f"{self.error} Suggestion: {self.suggestion}")

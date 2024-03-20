@@ -1,5 +1,5 @@
 from openai import OpenAI, NotFoundError
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 import instructor
 from config import openai_key
@@ -12,6 +12,7 @@ from _exceptions import (
     JSONSchemaParsingError,
     ModelExecutionError,
     UnsupportedModelVersionError,
+    ModelResponseFormatValidationError,
 )
 
 from datamodel_code_generator import DataModelType, PythonVersion
@@ -129,9 +130,16 @@ class GPT:
             }
             response_object.status = 200
             response_object.success = True
+
+            return response_object
         except NotFoundError as e:
             raise UnsupportedModelVersionError()
+
+        except ValidationError as e:
+            raise ModelResponseFormatValidationError(
+                error=str(e),
+                suggestion="Make the problematic field Optional to allow for null fields.",
+            )
+
         except Exception as e:
             raise ModelExecutionError()
-
-        return response_object
