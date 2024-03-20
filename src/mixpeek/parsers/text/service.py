@@ -42,7 +42,7 @@ class TextService:
             if response.status_code != 200:
                 raise Exception(f"Request failed with status {response.status_code}")
 
-            return response.json()
+            return response.json()["response"]["text"]
 
             # elements = partition_via_api(
             #     file=self.file_stream,

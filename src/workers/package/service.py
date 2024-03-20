@@ -74,6 +74,14 @@ class PackageManager:
                 req_file,
                 "--target",
                 function_path,
+                "--platform",
+                "manylinux2014_x86_64",
+                "--implementation",
+                "cp",
+                "--python-version",
+                "3.10",
+                "--only-binary=:all:",
+                "--upgrade",
             ]
         )
 

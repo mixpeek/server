@@ -4,6 +4,9 @@ from pydantic import BaseModel, Field
 from typing import Optional, Dict, Any
 import uvicorn
 
+from embed.model import EmbeddingResponse, EmbeddingRequest
+from embed.service import EmbeddingHandler
+
 from website.service import WebScraper
 from website.model import WebsiteData
 
@@ -38,6 +41,19 @@ async def parse_file(
     parse_handler = ParseHandler(parser_request.file_url)
     try:
         return await parse_handler.parse(should_chunk)
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
+
+
+@app.post("/embed", response_model=EmbeddingResponse)
+async def parse_file(data: EmbeddingRequest):
+    embedding_handler = EmbeddingHandler(data.modality, data.model)
+    try:
+        return embedding_handler.encode(data.input)
     except BadRequestError as e:
         raise BadRequestError(error=e.error)
     except NotFoundError as e:
