@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/mixpeek/mixpeek-services:latest
