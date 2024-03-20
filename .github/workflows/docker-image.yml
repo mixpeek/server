@@ -32,10 +32,10 @@ jobs:
         push: true
         tags: ghcr.io/${{ github.repository_owner }}/mixpeek-server:latest
 
-    - name: Build and push Parse Docker Image
-      uses: docker/build-push-action@v2
-      with:
-        context: src/workers
-        file: ./src/workers/Dockerfile
-        push: true
-        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-server-worker:latest
+    # - name: Build and push Parse Docker Imaged
+    #   uses: docker/build-push-action@v2
+    #   with:
+    #     context: src/workers
+    #     file: ./src/workers/Dockerfile
+    #     push: true
+    #     tags: ghcr.io/${{ github.repository_owner }}/mixpeek-server-worker:latest

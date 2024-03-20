@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Body, Depends, Request
 from typing import List, Optional
 
 from utilities.helpers import generate_uuid, current_time
+from utilities.code import CodeValidation
 
 from .model import (
     WorkflowCreateRequest,
@@ -59,6 +60,26 @@ async def run_workflow(
     workflow_service.update(workflow_id, {"last_run": current_time()})
 
     return result
+
+
+@router.get("/code")
+def convert_code_to_string(code: str = Body(...)):
+    # check security
+    # security_check = CodeValidation.check_code_security(code)
+    # if security_check is not True:
+    #     raise HTTPException(
+    #         status_code=401,
+    #         detail="Code did not pass security check: " + security_check,
+    #     )
+
+    # # various checks
+    # try:
+    #     CodeValidation.check_for_function(code)
+    # except Exception as e:
+    #     raise HTTPException(status_code=401, detail=str(e))
+
+    code_string = CodeValidation.convert_to_string(code)
+    return {"value": code}
 
 
 # @router.get('/', response_model=List[WorkflowMinimalResponse])
