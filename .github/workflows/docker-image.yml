@@ -27,12 +27,12 @@ jobs:
     - name: Build and push API Server Docker Image
       uses: docker/build-push-action@v2
       with:
-        context: src/mixpeek
-        file: ./src/mixpeek/Dockerfile
+        context: src/api
+        file: ./src/api/Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-server:latest
+        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-api:latest
 
-    - name: Build and push Services Docker Image
+    - name: Build and push Services Docker Image 
       uses: docker/build-push-action@v2
       with:
         context: src/services
