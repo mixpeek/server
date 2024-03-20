@@ -9,7 +9,7 @@ from .service import ParseHandler
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("")
 async def parse_file(
     request: Request,
     parser_request: ParseFileRequest,

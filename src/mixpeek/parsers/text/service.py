@@ -10,7 +10,7 @@ import json
 
 from _exceptions import InternalServerError
 
-from config import parser_url
+from config import services_url
 
 
 class TextService:
@@ -32,7 +32,7 @@ class TextService:
 
     async def run(self, should_chunk=True):
         try:
-            url = f"{parser_url}/file?should_chunk={str(should_chunk)}"
+            url = f"{services_url}/parse?should_chunk={str(should_chunk)}"
             data = json.dumps({"file_url": self.file_url})
             print(url, data)
 

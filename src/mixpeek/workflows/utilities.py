@@ -3,8 +3,6 @@ from cloud_services.aws.serverless import LambdaClass
 from utilities.code import CodeValidation
 from utilities.zipper import PackageZipper
 
-from config import parser_url
-
 from fastapi import HTTPException
 
 

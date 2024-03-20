@@ -7,6 +7,9 @@ import traceback
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
+from _utils import create_success_response
+
+
 
 class WebScraper:
 
@@ -157,14 +160,7 @@ class WebScraper:
         try:
             await self.recursiveScrap(0)
         except Exception as e:
-            return {
-                "status": "ok",
-                "message": "Scraping completed successfully.",
-                "data": self.data,
-            }, 200
+            return create_success_response(self.data)
         await self.browser.close()
-        return {
-            "status": "ok",
-            "message": "Scraping completed successfully.",
-            "data": self.data,
-        }, 200
+        return create_success_response(self.data)
+

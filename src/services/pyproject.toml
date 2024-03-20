@@ -16,6 +16,7 @@ python-multipart = "^0.0.9"
 fastapi = "^0.110.0"
 magika = "<0.5.1"
 unstructured = {extras = ["pdf"], version = "^0.12.6"}
+transformers = "4.37.1"
 
 
 [build-system]

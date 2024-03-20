@@ -1,2 +1,0 @@
-# monday listener
-# supabase listener

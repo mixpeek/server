@@ -6,6 +6,9 @@ import stat
 import aioboto3
 from config import aws as creds
 
+from _utils import create_success_response
+from _exceptions import InternalServerError, BadRequestError, NotFoundError
+
 
 class PackageManager:
     def __init__(self):
@@ -32,19 +35,12 @@ class PackageManager:
             s3_path = await self.upload_to_s3(zip_path, function_name)
 
             self.cleanup(function_path, zip_path)
-            return {
-                "success": True,
-                "status": 200,
-                "error": None,
-                "response": s3_path,
-            }, 200
+            return create_success_response(s3_path)
+
         except Exception as e:
-            return {
-                "success": False,
-                "status": 500,
-                "error": f"Error during package creation and upload: {e}",
-                "response": None,
-            }, 500
+            raise BadRequestError(
+                {"error": f"Error during package creation and upload: {e}"}
+            )
 
     def create_folder(self, function_name, python_version):
         function_path = os.path.join(self.tmp_dir, function_name)
@@ -104,8 +100,9 @@ class PackageManager:
                 )
             return {"bucket": self.s3_bucket_name, "key": f"{function_name}.zip"}
         except Exception as e:
-            print(e)
-            return str(e)
+            raise BadRequestError(
+                {"error": f"Error during package creation and upload: {e}"}
+            )
 
     def cleanup(self, function_path, zip_path):
         shutil.rmtree(function_path)

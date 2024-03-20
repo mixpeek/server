@@ -14,9 +14,7 @@ mongo_url = os.getenv("MONGO_URL")
 openai_key = os.getenv("OPENAI_KEY")
 
 # containers
-parser_url = os.getenv("PARSER_CONTAINER_URL")
-listener_url = os.getenv("LISTENER_CONTAINER_URL")
-inference_url = os.getenv("INFERENCE_CONTAINER_URL")
+services_url = os.getenv("SERVICES_CONTAINER_URL")
 
 # cloud
 mongodb_atlas = {

@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import time
 
 from _utils import create_success_response
+from _exceptions import BadRequestError
 
 from .modalities.text import TextEmbeddingService
 
@@ -27,7 +28,7 @@ class EmbeddingHandler:
         #     # openai/clip-vit-base-patch32
         #     self.service = VideoEmbeddingService(model)
         else:
-            raise ValueError(f"Unknown modality: {modality}")
+            raise BadRequestError({"error": "Modality not supported"})
 
     def encode(self, data):
         start_time = time.time() * 1000
