@@ -1,8 +1,8 @@
 ## Docker Commands:
 
-docker build --platform linux/amd64 -t nux/nux-server-parse:latest .
+docker build --platform linux/amd64 -t mixpeek/mixpeek-services:latest .
 
-docker run -p 8001:8001 nux/nux-server-parse:latest
+<!-- docker run -p 8001:8001 nux/nux-server-parse:latest -->
 
 ## Run without docker:
 
@@ -14,6 +14,6 @@ nux-server-parse-latest:8001
 
 ## push to gh
 
-docker tag nux/nux-server-parse:latest ghcr.io/nux-ai/nux-server-parse:latest
+docker tag mixpeek/mixpeek-services:latest ghcr.io/mixpeek/mixpeek-services:latest
 
-docker push ghcr.io/nux-ai/nux-server-parse:latest
+docker push ghcr.io/nux-ai/mixpeek-services:latest
