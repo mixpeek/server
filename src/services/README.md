@@ -16,4 +16,4 @@ nux-server-parse-latest:8001
 
 docker tag mixpeek/mixpeek-services:latest ghcr.io/mixpeek/mixpeek-services:latest
 
-docker push ghcr.io/nux-ai/mixpeek-services:latest
+docker push ghcr.io/mixpeek/mixpeek-services:latest
