@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 app = FastAPI(openapi_url="/docs/openapi.json", title="Mixpeek Services API")
-app = FastAPI(redirect_slashes=False)
+# app = FastAPI(redirect_slashes=False)
 
 
 @app.exception_handler(InternalServerError)

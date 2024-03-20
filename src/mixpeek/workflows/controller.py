@@ -1,15 +1,15 @@
-from fastapi import APIRouter, HTTPException, Body, Depends, Request
+from fastapi import APIRouter, Body, Depends, Request
 from typing import List, Optional
+from _exceptions import BadRequestError, InternalServerError, NotFoundError
+
 
 from utilities.helpers import generate_uuid, current_time
 from utilities.code import CodeValidation
 
 from .model import (
     WorkflowCreateRequest,
-    WorkflowMinimalResponse,
     WorkflowSchema,
-    QueryParamsSchema,
-    WorkflowInvokeResponse,
+    WorkflowResponse,
 )
 from .service import WorkflowSyncService
 from .invoke import invoke_handler
@@ -19,104 +19,73 @@ from db_internal.model import PaginationParams
 router = APIRouter()
 
 
-@router.post("/", response_model=WorkflowSchema)
+@router.post("/", response_model=WorkflowResponse)
 async def create_workflow(
     request: Request,
     workflow_request: WorkflowCreateRequest = Body(...),
     pagination: PaginationParams = Depends(),
 ):
-    workflow_service = WorkflowSyncService(request.index_id)
-    return workflow_service.create(workflow_request)
+    try:
+        workflow_service = WorkflowSyncService(request.index_id)
+        return workflow_service.create(workflow_request)
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
 
 
-@router.post("/{workflow_id}/invoke", response_model=WorkflowInvokeResponse)
+@router.post("/{workflow_id}/invoke", response_model=WorkflowResponse)
 async def run_workflow(
     request: Request,
     workflow_id: str,
     parameters: dict = Body(...),
     websocket_id: Optional[str] = None,
 ):
-    workflow_service = WorkflowSyncService(request.index_id)
+    try:
+        workflow_service = WorkflowSyncService(request.index_id)
 
-    workflow = workflow_service.get(workflow_id)
-    if not workflow:
-        raise HTTPException(
-            status_code=404, detail=f"Workflow {workflow_id} not found."
+        workflow = workflow_service.get(workflow_id)
+        if not workflow:
+            raise NotFoundError(error={"message": f"Workflow {workflow_id} not found."})
+        if workflow.get("metadata", {}).get("serverless_function_name") is None:
+            raise BadRequestError(
+                error={"message": f"Workflow {workflow_id} has no serverless function."}
+            )
+
+        # run invokation
+        result = await invoke_handler(
+            serverless_name=workflow["metadata"]["serverless_function_name"],
+            run_id=generate_uuid(),
+            websocket_id=websocket_id,
+            request_parameters=parameters,
         )
-    if workflow.get("metadata", {}).get("serverless_function_name") is None:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Workflow {workflow_id} has no serverless function.",
-        )
 
-    # run invokation
-    result = await invoke_handler(
-        serverless_name=workflow["metadata"]["serverless_function_name"],
-        run_id=generate_uuid(),
-        websocket_id=websocket_id,
-        request_parameters=parameters,
-    )
+        workflow_service.update(workflow_id, {"last_run": current_time()})
 
-    workflow_service.update(workflow_id, {"last_run": current_time()})
-
-    return result
+        return result
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
 
 
-@router.get("/code")
+@router.get("/code", response_model=WorkflowResponse)
 def convert_code_to_string(code: str = Body(...)):
-    # check security
-    # security_check = CodeValidation.check_code_security(code)
-    # if security_check is not True:
-    #     raise HTTPException(
-    #         status_code=401,
-    #         detail="Code did not pass security check: " + security_check,
-    #     )
-
-    # # various checks
-    # try:
-    #     CodeValidation.check_for_function(code)
-    # except Exception as e:
-    #     raise HTTPException(status_code=401, detail=str(e))
-
-    code_string = CodeValidation.convert_to_string(code)
-    return {"value": code}
-
-
-# @router.get('/', response_model=List[WorkflowMinimalResponse])
-# def list_workflows(
-#     request: Request,
-#     pagination: PaginationParams = Depends()
-# ):
-
-#     wb_service = WorkflowSyncService(
-#         index_id,
-#         version_id="latest",
-#         scope=scope
-#     )
-#     try:
-#         return wb_service.list(limit=pagination.limit, offset=pagination.offset)
-#     except:
-#         raise HTTPException(status_code=400, detail="Couldn't list workbooks.")
-
-
-# @router.get("/{workflow_id}")
-# async def get_workflow(
-#     request: Request,
-# ):
-
-#     return {"message": "Listener created"}
-
-
-# @router.put("/{workflow_id}")
-# async def update_workflow(
-#     request: Request,
-# ):
-
-#     return {"message": "Listener created"}
-
-
-# @router.delete("/{workflow_id}")
-# async def delete_workflow(
-#     request: Request,
-# ):
-#     return {"message": "Listener created"}
+    try:
+        return WorkflowResponse(
+            success=True,
+            status=200,
+            response={"code_as_string": code},
+            error=None,
+            metadata=None,
+        )
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)

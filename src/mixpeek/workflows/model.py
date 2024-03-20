@@ -4,12 +4,16 @@ from datetime import datetime
 from utilities.helpers import unique_name, generate_uuid
 
 
-class WorkflowInvokeResponse(BaseModel):
-    response: Optional[Any] = Field(None)
-    error: Optional[Any] = Field(None)
-    status: int = Field(500)
-    success: bool = Field(False)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+class WorkflowResponse(BaseModel):
+    success: bool = Field(
+        ..., description="Whether the WorkflowInvokeResponse succeeded or failed."
+    )
+    status: int = Field(
+        ..., description="HTTP status code."
+    )
+    response: Optional[dict] = Field(None)
+    error: Optional[dict] = Field(None)
+    metadata: Optional[dict] = {}
 
 
 class QueryParamsSchema(BaseModel):
@@ -26,7 +30,6 @@ class WorkflowSchema(BaseModel):
     created_at: datetime
     last_run: Optional[datetime]
     workflow_id: str
-    # code_as_string: str
     workflow_name: Optional[str]
     metadata: Optional[dict] = {}
     settings: WorkflowSettings
