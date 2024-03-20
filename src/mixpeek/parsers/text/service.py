@@ -65,7 +65,9 @@ class TextService:
             # processed_chunks = self.process_chunks(chunks, should_chunk)
             return processed_chunks
         except Exception as e:
-            raise InternalServerError({"message": str(e)})
+            raise InternalServerError(
+                error="There was an error with the request, reach out to support"
+            )
 
     # def process_chunks(self, chunks, should_chunk):
     #     if should_chunk:
