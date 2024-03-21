@@ -11,13 +11,13 @@ from fastapi import Request, Response, status
 router = APIRouter()
 
 
-@router.post("/")
+@router.post("/", include_in_schema=False)
 def create_organization(request: CreateOrgRequest):
     org_service = OrganizationSyncService()
     return org_service.create_organization(email=request.email)
 
 
-@router.put("/", response_model=TrustedOrgResponse)
+@router.put("/", response_model=TrustedOrgResponse, include_in_schema=False)
 def update_organization(
     updates: OrganizationUpdateRequest, index_id: str = Depends(get_index_id)
 ):
@@ -26,7 +26,7 @@ def update_organization(
     return service.update_organization(index_id, updates_dict)
 
 
-@router.get("/", response_model=TrustedOrgResponse)
+@router.get("/", response_model=TrustedOrgResponse, include_in_schema=False)
 def get_organization(index_id: str = Depends(get_index_id)):
     service = OrganizationSyncService()
     return service.get_organization(index_id)
