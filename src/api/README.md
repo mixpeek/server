@@ -44,13 +44,13 @@ Docs are at `/docs`,
 
 ## Docker Commands:
 
-docker build --platform linux/amd64 -t mixpeek/mixpeek-server:latest .
+docker build --platform linux/amd64 -t mixpeek/mixpeek-api:latest .
 
-docker run -p 8000:8000 mixpeek/mixpeek-server:latest
+docker run -p 8000:8000 mixpeek/mixpeek-api:latest
 
 
 ## push to gh
 
-docker tag mixpeek/mixpeek-server:latest ghcr.io/mixpeek/mixpeek-server:latest
+docker tag mixpeek/mixpeek-api:latest ghcr.io/mixpeek/mixpeek-api:latest
 
-docker push ghcr.io/mixpeek/mixpeek-server:latest
+docker push ghcr.io/mixpeek/mixpeek-api:latest

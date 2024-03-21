@@ -24,7 +24,7 @@ class ConfigsResponse(BaseModel):
 class EmbeddingRequest(BaseModel):
     input: str
     modality: Optional[Modality] = "text"
-    model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    model: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2"
 
 
 class EmbeddingResponse(BaseModel):

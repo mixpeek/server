@@ -53,6 +53,7 @@ class ParseHandler:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.head(self.file_url)
+                print(response)
                 if response.status_code == 200:
                     content_type = response.headers.get("content-type")
                     if not content_type:

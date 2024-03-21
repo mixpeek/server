@@ -62,6 +62,8 @@ async def run_workflow(
             request_parameters=parameters,
         )
 
+        print(result)
+
         workflow_service.update(workflow_id, {"last_run": current_time()})
 
         return result

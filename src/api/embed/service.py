@@ -1,52 +1,42 @@
-from transformers import AutoTokenizer, AutoModel
-import torch
-import torch.nn.functional as F
+import httpx
+import json
 import time
 
-from _utils import create_success_response
+from config import services_url
 
-from .modalities.text import TextEmbeddingService
-
-# from .modalities.image import ImageEmbeddingService
-# from .modalities.audio import AudioEmbeddingService
-# from .modalities.video import VideoEmbeddingService
+from _exceptions import InternalServerError, NotFoundError, BadRequestError
+from _utils import create_success_response, _send_post_request
 
 
 class EmbeddingHandler:
     def __init__(self, modality, model):
-        if modality == "text":
-            # sentence-transformers/all-MiniLM-L6-v2
-            self.service = TextEmbeddingService(model)
-        # elif modality == "image":
-        #     # openai/clip-vit-base-patch32
-        #     self.service = ImageEmbeddingService(model)
-        # elif modality == "audio":
-        #     # facebook/wav2vec2-base-960h
-        #     self.service = AudioEmbeddingService(model)
-        # elif modality == "video":
-        #     # openai/clip-vit-base-patch32
-        #     self.service = VideoEmbeddingService(model)
-        else:
-            raise ValueError(f"Unknown modality: {modality}")
+        self.modality = modality
+        self.model = model
 
-    def encode(self, data):
-        start_time = time.time() * 1000
-        embedding = self.service.encode(data).tolist()[0]
-        return create_success_response(
-            {
-                "embedding": embedding,
-                "elapsed_time": (time.time() * 1000) - start_time,
-            }
-        )
+    async def encode(self, data):
+        url = f"{services_url}/embed/{self.modality}"
+        try:
+            start_time = time.time() * 1000
+            resp = await _send_post_request(url, json.dumps(data))
+            return create_success_response(resp)
+        except Exception as e:
+            raise InternalServerError(
+                error="There was an error with the request, reach out to support"
+            )
 
-    def get_configs(self):
-        start_time = time.time() * 1000
-        dimensions = self.service.get_dimensions()
-        token_size = self.service.get_token_size()
-        return create_success_response(
-            {
-                "dimensions": dimensions,
-                "token_size": token_size,
-                "elapsed_time": (time.time() * 1000) - start_time,
-            }
-        )
+    async def get_configs(self):
+        """
+        accepts
+            modality: Optional[Modality] = "text"
+            model: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2"
+        """
+        url = f"{services_url}/embed/{self.modality}/config"
+        data = {"model": self.model, "modality": self.modality}
+        try:
+            start_time = time.time() * 1000
+            resp = await _send_post_request(url, json.dumps(data))
+            return create_success_response(resp)
+        except Exception as e:
+            raise InternalServerError(
+                error="There was an error with the request, reach out to support"
+            )

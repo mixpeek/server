@@ -6,7 +6,7 @@ import time
 from _utils import create_success_response
 from _exceptions import BadRequestError
 
-from .modalities.text import TextEmbeddingService
+from .text.service import TextEmbeddingService
 
 # from .modalities.image import ImageEmbeddingService
 # from .modalities.audio import AudioEmbeddingService
@@ -31,12 +31,10 @@ class EmbeddingHandler:
             raise BadRequestError({"error": "Modality not supported"})
 
     def encode(self, data):
-        start_time = time.time() * 1000
         embedding = self.service.encode(data).tolist()[0]
         return create_success_response(
             {
                 "embedding": embedding,
-                "elapsed_time": (time.time() * 1000) - start_time,
             }
         )
 
@@ -45,9 +43,5 @@ class EmbeddingHandler:
         dimensions = self.service.get_dimensions()
         token_size = self.service.get_token_size()
         return create_success_response(
-            {
-                "dimensions": dimensions,
-                "token_size": token_size,
-                "elapsed_time": (time.time() * 1000) - start_time,
-            }
+            {"dimensions": dimensions, "token_size": token_size}
         )

@@ -1,4 +1,7 @@
-from fastapi import APIRouter  # Import APIRouter instead of FastAPI
+from fastapi import APIRouter, Request
+
+from _exceptions import BadRequestError, InternalServerError, NotFoundError
+
 
 from .model import (
     EmbeddingRequest,
@@ -7,18 +10,32 @@ from .model import (
     ConfigsResponse,
 )
 
-from embed.service import EmbeddingHandler
+from .service import EmbeddingHandler
 
 router = APIRouter()
 
 
-@router.get("/configs", response_model=ConfigsResponse)
+@router.get("/config", response_model=ConfigsResponse)
 async def get_dimensions(data: ConfigsRequest):
-    embedding_handler = EmbeddingHandler(data.modality, data.model)
-    return embedding_handler.get_configs()
+    try:
+        embedding_handler = EmbeddingHandler(data.modality, data.model)
+        return await embedding_handler.get_configs()
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
 
 
 @router.get("/", response_model=EmbeddingResponse)
 async def embed_input(data: EmbeddingRequest):
-    embedding_handler = EmbeddingHandler(data.modality, data.model)
-    return embedding_handler.encode(data.input)
+    try:
+        embedding_handler = EmbeddingHandler(data.modality, data.model)
+        return await embedding_handler.encode(data.model_dump())
+    except BadRequestError as e:
+        raise BadRequestError(error=e.error)
+    except NotFoundError as e:
+        raise NotFoundError(error=e.error)
+    except InternalServerError as e:
+        raise InternalServerError(error=e.error)
