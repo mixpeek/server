@@ -11,6 +11,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: true
 
     steps:
     - uses: actions/checkout@v3
@@ -30,7 +32,7 @@ jobs:
         context: src/api
         file: ./src/api/Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-api:latest
+        tags: ghcr.io/${{ github.repository_owner }}/api:latest
 
     - name: Build and push Services Docker Image 
       uses: docker/build-push-action@v2
@@ -38,4 +40,4 @@ jobs:
         context: src/services
         file: ./src/services/Dockerfile
         push: true
-        tags: ghcr.io/${{ github.repository_owner }}/mixpeek-services:latest
+        tags: ghcr.io/${{ github.repository_owner }}/services:latest
