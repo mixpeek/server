@@ -42,3 +42,5 @@ jobs:
         file: ./src/services/Dockerfile
         push: true
         tags: ghcr.io/${{ github.repository_owner }}/services:latest
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
