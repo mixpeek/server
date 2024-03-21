@@ -1,6 +1,6 @@
 from cloud_services.aws.serverless import AsyncLambdaClass
 import time
-from _exceptions import InternalServerError
+from _exceptions import BadRequestError, InternalServerError
 
 
 async def invoke_handler(serverless_name, run_id, websocket_id, request_parameters):
@@ -11,6 +11,10 @@ async def invoke_handler(serverless_name, run_id, websocket_id, request_paramete
             serverless_name,
             request_parameters,
         )
-        return response
+        if not response.get("success"):
+            raise BadRequestError(error=response.get("error"))
+        else:
+            return response
+
     except Exception as e:
-        raise InternalServerError(error={"message": "Failed to invoke function"})
+        raise BadRequestError(error=response.get("error"))

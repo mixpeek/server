@@ -7,6 +7,40 @@ from .service import ListenerAsyncService
 router = APIRouter()
 
 
+{
+    "pipeline": {
+        # connection information
+        "connection_information": {
+            "engine": "mongodb",
+            "host": "",
+            "port": "",
+            "username": "",
+            "password": "",
+            "database": "",
+            "collection": "documents",
+        },
+        "processes": [
+            {
+                "source": {
+                    "filters": {"status": "processing"},  # must match all of these
+                    "actions": ["insert"],
+                    "field": {
+                        "name": "file_url",
+                        "type": "url",  # vs inline
+                        "embedding_model": "bert",
+                    },
+                },
+                "destination": {
+                    "collection": "documents_elements",
+                    "new_field_name": "file_elements",  # contents of the chunks
+                    "new_embeddings": "file_embeddings",
+                },
+            }
+        ],
+    }
+}
+
+
 @router.post("/{provider}")
 async def receive_payload(request: Request):
     listener_service = ListenerAsyncService(request.index_id)
