@@ -2,7 +2,7 @@ from config import aws, python_version
 from bson import ObjectId
 
 
-from db_internal.service import BaseSyncDBService
+from db.service import BaseSyncDBService
 
 from .model import WorkflowCreateRequest, WorkflowResponse
 from .utilities import CodeHandler

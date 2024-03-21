@@ -14,7 +14,7 @@ celery_app = Celery(
     "worker",
     broker=f"{redis_url}/0",
     backend=f"{redis_url}/1",
-    include=["batch.tasks", "loaders.tasks"],
+    include=["pipeline.tasks"],
 )
 
 

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import Optional, Union, cast
 
 from auth.service import get_index_id
-from db_internal.model import PaginationParams
+from db.model import PaginationParams
 
 from .model import CreateOrgRequest, TrustedOrgResponse, OrganizationUpdateRequest
 from .service import OrganizationSyncService

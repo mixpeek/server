@@ -14,7 +14,7 @@ from .model import (
 from .service import WorkflowSyncService
 from .invoke import invoke_handler
 
-from db_internal.model import PaginationParams
+from db.model import PaginationParams
 
 router = APIRouter()
 

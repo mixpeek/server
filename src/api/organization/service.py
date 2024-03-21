@@ -4,7 +4,7 @@ from pydantic import ValidationError
 from utilities.helpers import generate_api_key
 from utilities.encryption import SecretCipher
 
-from db_internal.service import sync_db, mongo_client, BaseSyncDBService
+from db.service import sync_db, mongo_client, BaseSyncDBService
 from pymongo import ReturnDocument
 from fastapi import HTTPException
 from .model import (
