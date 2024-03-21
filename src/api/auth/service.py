@@ -1,4 +1,4 @@
-from fastapi import Depends, Header, Request
+from fastapi import Header, Request
 from organization.service import OrganizationSyncService
 from typing import Optional
 
@@ -35,6 +35,5 @@ def get_index_id(
         raise NotFoundError(error="Index ID not found")
 
     request.index_id = index_id
-    request.api_key = api_key
 
     return index_id

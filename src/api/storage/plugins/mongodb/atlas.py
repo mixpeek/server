@@ -9,10 +9,26 @@ class AtlasClient:
         self.public_key = public_key
         self.private_key = private_key
         self.headers = {"Content-Type": "application/vnd.atlas.2023-01-01+json"}
+        self.index = Index(self)
+        self.trigger = Trigger(self)
 
-    # indexes
-    async def create_index(self):
-        url = f"https://cloud.mongodb.com/api/atlas/v2/groups/{self.group_id}/clusters/{self.cluster_name}/fts/indexes?pretty=true"
+    async def _post_request(self, url, data):
+        async with httpx.AsyncClient() as client:
+            r = await client.post(
+                url,
+                headers=self.headers,
+                data=json.dumps(data),
+                auth=(self.public_key, self.private_key),
+            )
+        return r.text
+
+
+class Index:
+    def __init__(self, client):
+        self.client = client
+
+    async def create(self):
+        url = f"https://cloud.mongodb.com/api/atlas/v2/groups/{self.client.group_id}/clusters/{self.client.cluster_name}/fts/indexes?pretty=true"
         payload = {
             "collectionName": "string",
             "database": "string",
@@ -21,14 +37,18 @@ class AtlasClient:
             "fields": [{"property1": {}, "property2": {}}],
         }
 
-    async def list_indexes(self):
+    async def list(self):
         pass
 
-    async def delete_index(self):
+    async def delete(self):
         pass
 
-    # triggers
-    async def create_trigger(
+
+class Trigger:
+    def __init__(self, client):
+        self.client = client
+
+    async def create(
         self, trigger_name, trigger_type, function_name, event_subscription
     ):
         url = "https://services.cloud.mongodb.com/api/admin/v3.0/groups/{groupId}/apps/{appId}/triggers"
@@ -46,21 +66,11 @@ class AtlasClient:
                 "full_document": True,
             },
         }
-        response_text = await self._post_request(url=url, data=trigger_payload)
+        response_text = await self.client._post_request(url=url, data=trigger_payload)
         return response_text
 
-    async def list_triggers(self):
+    async def list(self):
         pass
 
-    async def delete_trigger(self):
+    async def delete(self):
         pass
-
-    async def _post_request(self, url, data):
-        async with httpx.AsyncClient() as client:
-            r = await client.post(
-                url,
-                headers=self.headers,
-                data=json.dumps(data),
-                auth=(self.public_key, self.private_key),
-            )
-        return r.text

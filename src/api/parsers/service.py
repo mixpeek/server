@@ -1,20 +1,47 @@
-import cgi
 import httpx
-from io import BytesIO
-from magika import Magika
+import json
 import time
 
-from .utils import generate_filename_from_url, get_filename_from_cd
-from .text.service import TextService
+from config import services_url
 
 from _exceptions import InternalServerError, NotFoundError, BadRequestError
-from _utils import create_success_response
+from _utils import create_success_response, _send_post_request
 
-files = {
-    "text": ["pdf", "docx", "txt", "md", "html", "xml"],
-    "image": ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp"],
-    "audio": ["mp3", "wav", "ogg", "flac", "m4a", "wma", "aac"],
-    "video": ["mp4", "mkv", "webm", "avi", "mov", "wmv", "flv"],
+modality_to_content_types = {
+    "text": [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "text/plain",
+        "text/markdown",
+        "text/html",
+        "application/xml",
+    ],
+    "image": [
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/bmp",
+        "image/tiff",
+        "image/webp",
+    ],
+    "audio": [
+        "audio/mpeg",
+        "audio/wav",
+        "audio/ogg",
+        "audio/flac",
+        "audio/mp4",
+        "audio/x-ms-wma",
+        "audio/aac",
+    ],
+    "video": [
+        "video/mp4",
+        "video/x-matroska",
+        "video/webm",
+        "video/x-msvideo",
+        "video/quicktime",
+        "video/x-ms-wmv",
+        "video/x-flv",
+    ],
 }
 
 
@@ -22,65 +49,48 @@ class ParseHandler:
     def __init__(self, file_url):
         self.file_url = file_url
 
-    async def download_into_memory(self):
+    async def _get_file_type(self):
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.get(self.file_url)
+                response = await client.head(self.file_url)
                 if response.status_code == 200:
-                    filename = get_filename_from_cd(
-                        response.headers.get("content-disposition")
-                    )
-                    if not filename:
-                        filename = generate_filename_from_url(self.file_url)
-                    else:
-                        raise BadRequestError(error={"message": "Filename not found"})
-                    return response.content, filename
+                    content_type = response.headers.get("content-type")
+                    if not content_type:
+                        raise BadRequestError(
+                            error={"message": "Content type not found"}
+                        )
+                    return content_type
                 else:
-                    raise BadRequestError(error={"message": "Error downloading file"})
+                    raise BadRequestError(
+                        error={"message": "Error retrieving file info"}
+                    )
 
         except Exception as e:
-            raise BadRequestError(error={"message": "Error downloading file"})
+            raise BadRequestError(error={"message": "Error retrieving file info"})
 
-    def detect_filetype(self, contents):
-        try:
-            m = Magika()
-            res = m.identify_bytes(contents)
-            # {
-            #     "label": "pdf",
-            #     "description": "PDF document",
-            #     "mime_type": "application/pdf",
-            #     "group": "document",
-            # }
-            data = {
-                "label": res.output.ct_label,
-                "mime_type": res.output.mime_type,
-                "group": res.output.group,
-            }
-            return data
-        except Exception as e:
-            raise BadRequestError(
-                error={"message": "Error occurred while detecting filetype"}
-            )
+    def _get_modality(self, content_type):
+        for modality, content_types in modality_to_content_types.items():
+            if content_type in content_types:
+                return modality
+        raise BadRequestError(f"Content type {content_type} not recognized")
 
     async def parse(self, should_chunk=True):
-        # Download file into memory
-        contents, filename = await self.download_into_memory()
-        stream = BytesIO(contents)
+        content_type = await self._get_file_type()
+        modality = self._get_modality(content_type)
 
-        # Detect file type
-        metadata = self.detect_filetype(stream.getvalue())
-        metadata.update({"filename": filename})
+        url = f"{services_url}/parse/{modality}?should_chunk={str(should_chunk)}"
+        data = json.dumps({"file_url": self.file_url})
 
-        text_service = TextService(self.file_url, metadata)
-
-        start_time = time.time() * 1000
-        # Process file based on chunking preference and file type
-        if metadata["label"] == "pdf":
-            text_output = await text_service.run(should_chunk)
-        else:
-            raise BadRequestError(error={"message": "File type not supported"})
-
-        # Calculate elapsed time
-        metadata["elapsed_taken"] = (time.time() * 1000) - start_time
-
-        return create_success_response({"text": text_output, "metadata": metadata})
+        try:
+            start_time = time.time() * 1000
+            resp = await _send_post_request(url, data)
+            return create_success_response(resp)
+        except Exception as e:
+            raise InternalServerError(
+                error="There was an error with the request, reach out to support"
+            )
+        #     return create_success_response(resp)
+        # except Exception as e:
+        #     raise InternalServerError(
+        #         error="There was an error with the request, reach out to support"
+        #     )

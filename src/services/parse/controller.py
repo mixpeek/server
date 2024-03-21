@@ -9,15 +9,15 @@ from .service import ParseHandler
 router = APIRouter()
 
 
-@router.post("")
+@router.post("/{modality}")
 async def parse_file(
-    request: Request,
+    modality: str,
     parser_request: ParseFileRequest,
     should_chunk: Optional[bool] = True,
 ):
     parse_handler = ParseHandler(parser_request.file_url)
     try:
-        return await parse_handler.parse(should_chunk)
+        return await parse_handler.parse(modality, should_chunk)
     except BadRequestError as e:
         raise BadRequestError(error=e.error)
     except NotFoundError as e:

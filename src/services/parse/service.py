@@ -10,13 +10,6 @@ from .text.service import TextService
 from _exceptions import InternalServerError, NotFoundError, BadRequestError
 from _utils import create_success_response
 
-files = {
-    "text": ["pdf", "docx", "txt", "md", "html", "xml"],
-    "image": ["png", "jpg", "jpeg", "gif", "bmp", "tiff", "webp"],
-    "audio": ["mp3", "wav", "ogg", "flac", "m4a", "wma", "aac"],
-    "video": ["mp4", "mkv", "webm", "avi", "mov", "wmv", "flv"],
-}
-
 
 class ParseHandler:
     def __init__(self, file_url):
@@ -62,7 +55,7 @@ class ParseHandler:
                 error={"message": "Error occurred while detecting filetype"}
             )
 
-    async def parse(self, should_chunk=True):
+    async def parse(self, modality, should_chunk=True):
         # Download file into memory
         contents, filename = await self.download_into_memory()
         stream = BytesIO(contents)
@@ -71,16 +64,16 @@ class ParseHandler:
         metadata = self.detect_filetype(stream.getvalue())
         metadata.update({"filename": filename})
 
-        text_service = TextService(stream, metadata)
-
-        start_time = time.time() * 1000
-        # Process file based on chunking preference and file type
-        if metadata["label"] == "pdf":
-            text_output = await text_service.run(should_chunk)
+        if modality == "text":
+            text_service = TextService(stream, metadata)
+            output = await text_service.handler(should_chunk)
         else:
-            raise BadRequestError(error={"message": "File type not supported"})
+            raise BadRequestError(error="Modality not supported")
 
-        # Calculate elapsed time
-        metadata["elapsed_taken"] = (time.time() * 1000) - start_time
+        # # Process file based on chunking preference and file type
+        # if metadata["label"] == "pdf":
+        #     text_output = await text_service.run(should_chunk)
+        # else:
+        #     raise BadRequestError(error={"message": "File type not supported"})
 
-        return create_success_response({"text": text_output, "metadata": metadata})
+        return create_success_response({modality: output, "metadata": metadata})

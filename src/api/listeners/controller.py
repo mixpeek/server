@@ -7,7 +7,7 @@ from .service import ListenerAsyncService
 router = APIRouter()
 
 
-@router.post("/{provider_id}")
+@router.post("/{provider}")
 async def receive_payload(request: Request):
     listener_service = ListenerAsyncService(request.index_id)
     obj = await request.json()
