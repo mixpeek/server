@@ -78,9 +78,9 @@ class Metadata(BaseModel):
     elapsed_time: Optional[float] = Field(
         ..., description="The elapsed time of the generation process in milliseconds."
     )
-    # total_tokens: Optional[int] = Field(
-    #     ..., description="The number of tokens generated in the response."
-    # )
+    total_tokens: Optional[int] = Field(
+        ..., description="The number of tokens generated in the response."
+    )
 
 
 class GenerationResponse(BaseModel):

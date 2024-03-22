@@ -90,7 +90,7 @@ class GPT:
             response_object.response = json.loads(tool_output)
             response_object.metadata = {
                 "elapsed_time": (time.time() * 1000) - start_time,
-                **gpt_json["usage"],
+                "total_tokens": gpt_json["usage"]["total_tokens"],
             }
             response_object.status = 200
             response_object.success = True
