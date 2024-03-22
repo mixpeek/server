@@ -1,7 +1,7 @@
 from openai import OpenAI, NotFoundError
 from pydantic import BaseModel, Field, ValidationError
+import copy
 
-import instructor
 from config import openai_key
 import json
 import time
@@ -23,6 +23,49 @@ class GPT:
     def __init__(self, generation_request: GenerationRequest):
         self.generation_request = generation_request
 
+    def _resolve_references(self, schema, definitions):
+        if isinstance(schema, dict):
+            if "$ref" in schema:
+                ref_path = schema["$ref"].split("/")[-1]
+                return self._resolve_references(definitions[ref_path], definitions)
+            else:
+                for key, value in schema.items():
+                    schema[key] = self._resolve_references(value, definitions)
+        elif isinstance(schema, list):
+            for i, item in enumerate(schema):
+                schema[i] = self._resolve_references(item, definitions)
+        return schema
+
+    def _simplify_anyof_allof(self, schema):
+        if isinstance(schema, dict):
+            if "anyOf" in schema:
+                return self._simplify_anyof_allof(schema["anyOf"][0])
+            elif "allOf" in schema:
+                return self._simplify_anyof_allof(schema["allOf"][0])
+            else:
+                for key, value in schema.items():
+                    schema[key] = self._simplify_anyof_allof(value)
+        elif isinstance(schema, list):
+            for i, item in enumerate(schema):
+                schema[i] = self._simplify_anyof_allof(item)
+        return schema
+
+    def _transform_schema(self, schema):
+        schema_copy = copy.deepcopy(schema)
+        definitions = schema_copy.get("$defs", {})
+        resolved_schema = self._resolve_references(schema_copy, definitions)
+        simplified_schema = self._simplify_anyof_allof(resolved_schema)
+        if "$defs" in simplified_schema:
+            del simplified_schema["$defs"]
+        return simplified_schema
+
+    def _extract_response_format(self):
+        if not self.generation_request.response_format:
+            return None
+        json_schema = self.generation_request.response_format
+        transformed_schema = self._transform_schema(json_schema)
+        return transformed_schema
+
     def _extract_settings(self):
         if self.generation_request.settings:
             return {
@@ -31,16 +74,6 @@ class GPT:
                 if v is not None and k != "system_prompt"
             }
         return {}
-
-    def _extract_response_format(self):
-        # Check if the generation request has a specified response format. If not, return None.
-        if not self.generation_request.response_format:
-            return None
-
-        # Convert the response format from a Python dictionary to a JSON string.
-        json_schema = self.generation_request.response_format
-
-        return json_schema
 
     def run(self):
         response_object = GenerationResponse(
