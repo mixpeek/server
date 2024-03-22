@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 {
-    "pipeline": {
+    "listener": {
         # connection information
         "connection_information": {
             "engine": "mongodb",

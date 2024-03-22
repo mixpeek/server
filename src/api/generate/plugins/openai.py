@@ -15,12 +15,8 @@ from _exceptions import (
     ModelResponseFormatValidationError,
 )
 
-from datamodel_code_generator import DataModelType, PythonVersion
-from datamodel_code_generator.model import get_data_model_types
-from datamodel_code_generator.parser.jsonschema import JsonSchemaParser
 
-
-client = instructor.patch(OpenAI(api_key=openai_key))
+client = OpenAI(api_key=openai_key)
 
 
 class GPT:
@@ -42,57 +38,9 @@ class GPT:
             return None
 
         # Convert the response format from a Python dictionary to a JSON string.
-        json_schema = json.dumps(self.generation_request.response_format)
+        json_schema = self.generation_request.response_format
 
-        # Retrieve the data model types for Pydantic version 2, targeting Python 3.10.
-        data_model_types = get_data_model_types(
-            DataModelType.PydanticV2BaseModel,
-            target_python_version=PythonVersion.PY_310,
-        )
-
-        # Initialize a JsonSchemaParser with the JSON schema and the retrieved data model types.
-        parser = JsonSchemaParser(
-            json_schema,
-            data_model_type=data_model_types.data_model,
-            data_model_root_type=data_model_types.root_model,
-            data_model_field_type=data_model_types.field_model,
-            data_type_manager_type=data_model_types.data_type_manager,
-            dump_resolve_reference_action=data_model_types.dump_resolve_reference_action,
-        )
-
-        # Parse the JSON schema to generate Python code for the corresponding Pydantic model.
-        result = parser.parse()
-        local_namespace = {}
-
-        # Execute the generated Python code to define the Pydantic model in the local namespace.
-        exec(result, globals(), local_namespace)
-
-        # Initialize variable to hold the last BaseModel subclass found
-        last_model_class = None
-
-        # Iterate over generated pydantic models in local_namespace
-        for name, obj in local_namespace.items():
-            # Check if the object is a class and is a subclass of BaseModel (excluding BaseModel itself)
-            if (
-                isinstance(obj, type)
-                and issubclass(obj, BaseModel)
-                and obj is not BaseModel
-            ):
-                last_model_class = obj
-
-        # Now, last_model_class should hold the last defined Pydantic model class, if any
-        if last_model_class is None:
-            raise JSONSchemaParsingError("No Pydantic model class found")
-        else:
-            # Proceed with using model_class as needed
-            model_class = last_model_class
-
-        # If the model class could not be retrieved, raise a JSONSchemaParsingError.
-        if model_class is None:
-            raise JSONSchemaParsingError(f"JSON Schema parsing failed")
-
-        # Return the Pydantic model class.
-        return model_class
+        return json_schema
 
     def run(self):
         response_object = GenerationResponse(
@@ -113,25 +61,42 @@ class GPT:
             self.generation_request.messages.append(
                 {"role": "user", "content": self.generation_request.context}
             )
+        messages = [{"role": "user", "content": self.generation_request.context}]
+        tools = [
+            {
+                "type": "function",
+                "function": {
+                    "name": "function",
+                    "description": "",
+                    "parameters": response_format,
+                },
+            }
+        ]
 
+        start_time = time.time() * 1000
         try:
-            start_time = time.time() * 1000
-            completion = client.chat.completions.create(
+            response = client.chat.completions.create(
                 model=self.generation_request.model.model,
-                response_model=response_format,
-                messages=self.generation_request.messages,
+                messages=messages,
+                tools=tools,
+                tool_choice="auto",  # auto is default, but we'll be explicit
                 **settings,
-            )
+            ).json()
+            gpt_json = json.loads(response)
+            tool_output = gpt_json["choices"][0]["message"]["tool_calls"][0][
+                "function"
+            ]["arguments"]
 
-            response_object.response = completion
+            response_object.response = json.loads(tool_output)
             response_object.metadata = {
                 "elapsed_time": (time.time() * 1000) - start_time,
-                "output_token_count": completion._raw_response.usage.total_tokens,
+                **gpt_json["usage"],
             }
             response_object.status = 200
             response_object.success = True
 
             return response_object
+
         except NotFoundError as e:
             raise UnsupportedModelVersionError()
 

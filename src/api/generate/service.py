@@ -41,10 +41,14 @@ async def generate_orchestrator(request: GenerationRequest) -> GenerationRespons
         raise NotFoundError(error="Unsupported model version.")
 
     except JSONSchemaParsingError as e:
-        raise BadRequestError(error="JSON schema parsing error. Please make sure you provided a valid json schema.")
+        raise BadRequestError(
+            error="JSON schema parsing error. Please make sure you provided a valid json schema."
+        )
 
     except ModelExecutionError as e:
-        raise InternalServerError(error="Something went wrong when calling the model. Please try again.")
+        raise InternalServerError(
+            error="Something went wrong when calling the model. Please try again."
+        )
 
     except ModelResponseFormatValidationError as e:
         raise BadRequestError(error=str(e))
