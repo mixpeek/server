@@ -1,0 +1,1 @@
+clip + mean pooling
