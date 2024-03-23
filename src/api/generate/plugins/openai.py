@@ -116,11 +116,9 @@ class GPT:
                 **settings,
             ).json()
             gpt_json = json.loads(response)
-            tool_output = gpt_json["choices"][0]["message"]["tool_calls"][0][
-                "function"
-            ]["arguments"]
+            content = gpt_json["choices"][0]["message"]["content"]
 
-            response_object.response = json.loads(tool_output)
+            response_object.response = json.loads(content)
             response_object.metadata = {
                 "elapsed_time": (time.time() * 1000) - start_time,
                 "total_tokens": gpt_json["usage"]["total_tokens"],
