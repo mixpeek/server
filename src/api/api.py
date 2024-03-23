@@ -15,6 +15,7 @@ from parsers.controller import router as parsers_router
 from workflows.controller import router as workflow_router
 from generate.controller import router as generate_router
 from embed.controller import router as embed_router
+from listeners.controller import router as listener_router
 
 api_router = APIRouter()
 
@@ -46,7 +47,7 @@ api_router.include_router(
 
 # authenticated
 # fmt: off
-# api_router.include_router(listener_router, prefix="/listeners", tags=["Listeners"], dependencies=[Depends(get_index_id)])
+api_router.include_router(listener_router, prefix="/listeners", tags=["Listeners"], dependencies=[Depends(get_index_id)])
 api_router.include_router(parsers_router, prefix="/parsers", tags=["Parsers"], dependencies=[Depends(get_index_id)])
 api_router.include_router(workflow_router, prefix="/workflows", tags=["Workflows"], dependencies=[Depends(get_index_id)])
 api_router.include_router(generate_router, prefix="/generate", tags=["Generaters"], dependencies=[Depends(get_index_id)])
