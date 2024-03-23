@@ -1,6 +1,7 @@
 from cloud_services.aws.serverless import AsyncLambdaClass
 import time
 from _exceptions import BadRequestError, InternalServerError
+from utilities.methods import create_success_response
 
 
 async def invoke_handler(serverless_name, run_id, websocket_id, request_parameters):
@@ -14,7 +15,7 @@ async def invoke_handler(serverless_name, run_id, websocket_id, request_paramete
         if not response.get("success"):
             raise BadRequestError(error=response.get("error"))
         else:
-            return response
+            return create_success_response(response)
 
     except Exception as e:
         raise BadRequestError(error=response.get("error"))

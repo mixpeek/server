@@ -7,7 +7,7 @@ import json
 import time
 
 from generate.models.model import GenerationRequest, GenerationResponse
-from _utils import generate_uuid, current_time
+from utilities.methods import generate_uuid, current_time
 from _exceptions import (
     JSONSchemaParsingError,
     ModelExecutionError,

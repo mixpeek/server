@@ -3,7 +3,7 @@ from enum import Enum
 from pydantic import BaseModel, Field, EmailStr, validator
 from typing import List, Optional, Union
 
-from utilities.helpers import generate_api_key
+from utilities.helpers import generate_api_key, current_time
 from utilities.encryption import SecretCipher
 
 
@@ -90,7 +90,7 @@ class Connection(BaseModel):
 # User and Organization Models
 class User(BaseModel):
     email: EmailStr
-    creation_date: datetime = Field(default_factory=datetime.now)
+    creation_date: datetime = Field(default_factory=current_time)
     metadata: dict = Field(default_factory=dict)
     scope: str = Field(default="organization")
 
@@ -99,7 +99,7 @@ class OrganizationBase(BaseModel):
     org_id: str = Field(default_factory=lambda: "org-" + generate_api_key())
     indexes: List[str] = Field(default_factory=list)
     metadata: dict = Field(default_factory=dict)
-    creation_date: datetime = Field(default_factory=datetime.now)
+    creation_date: datetime = Field(default_factory=current_time)
     secrets: List[Secret] = Field(default_factory=list)
     api_keys: List[ApiKey] = Field(default_factory=list)
     users: List[User] = Field(default_factory=list)

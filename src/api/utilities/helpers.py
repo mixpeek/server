@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from urllib.parse import quote_plus
 from haikunator import Haikunator
-from magika import Magika
+from bson import ObjectId
 
 
 def generate_api_key():
@@ -48,3 +48,13 @@ def convert_to_variable_name(s):
 def make_string_url_safe(s):
     """Convert a string into a URL safe string."""
     return quote_plus(s)
+
+
+def convert_objectid_to_str(item):
+    if isinstance(item, dict):
+        for key, value in item.items():
+            if isinstance(value, ObjectId):
+                item[key] = str(value)
+            elif isinstance(value, dict):
+                item[key] = convert_objectid_to_str(value)
+    return item

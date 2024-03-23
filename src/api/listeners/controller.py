@@ -2,7 +2,9 @@ from fastapi import APIRouter, HTTPException, Body, Depends, Request
 import json
 
 # from .model import ConnectionInformation
-# from .service import ListenerAsyncService
+from .service import ListenerAsyncService
+
+from _exceptions import route_exeception_handler
 
 router = APIRouter()
 
@@ -27,7 +29,7 @@ router = APIRouter()
                     "field": {
                         "name": "file_url",
                         "type": "url",  # vs inline
-                        "embedding_model": "bert",
+                        "embedding_model": "jinaai/jina-embeddings-v2-base-en",
                     },
                 },
                 "destination": {
@@ -42,10 +44,12 @@ router = APIRouter()
 
 
 @router.post("/{provider}")
+@route_exeception_handler
 async def receive_payload(request: Request):
-    # listener_service = ListenerAsyncService(request.index_id)
+    listener_service = ListenerAsyncService(request.index_id)
     obj = await request.json()
+
     print(obj)
-    # listener_service.insert(obj["record"])
+    # await listener_service.process(obj)
 
     return {"message": "received"}

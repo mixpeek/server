@@ -9,7 +9,7 @@ from _exceptions import (
     NotFoundError,
     BadRequestError,
 )
-from _utils import create_json_response
+from utilities.methods import create_json_response
 
 from api import api_router
 

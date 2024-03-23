@@ -7,10 +7,14 @@ from db.service import BaseSyncDBService
 from .model import WorkflowCreateRequest, WorkflowResponse
 from .utilities import CodeHandler
 
-from _exceptions import InternalServerError
+from utilities.helpers import (
+    convert_objectid_to_str,
+    generate_function_name,
+    current_time,
+)
+from utilities.methods import create_success_response
 
-
-from utilities.helpers import generate_function_name, current_time
+from _exceptions import InternalServerError, NotFoundError, BadRequestError
 
 
 class WorkflowSyncService(BaseSyncDBService):
@@ -24,10 +28,6 @@ class WorkflowSyncService(BaseSyncDBService):
             metadata=workflow_request.metadata,
             settings=workflow_request.settings,
             workflow_name=workflow_request.workflow_name,
-        )
-
-        workflow_response = WorkflowResponse(
-            success=False, status=500, response=None, error=None, metadata={}
         )
 
         # create unique name for lambda function
@@ -57,17 +57,39 @@ class WorkflowSyncService(BaseSyncDBService):
         # create lambda function
         code_handler.create_lambda_function(s3_dict["bucket"], s3_dict["key"])
 
+        # update metadata
         new_workflow.metadata["serverless_function_name"] = function_name
         new_workflow.metadata["serverless_last_edited"] = current_time()
 
-        create_one_response = self.create_one(new_workflow.model_dump())
-        create_one_response = self.convert_objectid_to_str(create_one_response)
+        # add to DB
+        db_response = self.create_one(new_workflow.model_dump())
 
-        workflow_response.status = 200
-        workflow_response.success = True
-        workflow_response.response = create_one_response
+        # prepare response
+        workflow_response = {
+            "workflow_id": new_workflow.workflow_id,
+            "workflow_name": new_workflow.workflow_name,
+            "created_at": new_workflow.created_at.isoformat(),
+            "metadata": {
+                "serverless_function_name": new_workflow.metadata[
+                    "serverless_function_name"
+                ],
+                "serverless_last_edited": new_workflow.metadata[
+                    "serverless_last_edited"
+                ].isoformat(),
+            },
+        }
 
-        return workflow_response
+        return create_success_response(workflow_response)
+
+    def get_and_validate(self, workflow_id):
+        workflow = self.get(workflow_id)
+        if not workflow:
+            raise NotFoundError(error={"message": f"Workflow {workflow_id} not found."})
+        if workflow.get("metadata", {}).get("serverless_function_name") is None:
+            raise BadRequestError(
+                error={"message": f"Workflow {workflow_id} has no serverless function."}
+            )
+        return workflow
 
     def list(self, lookup_conditions=None, limit=None, offset=None):
         if lookup_conditions is None:
@@ -84,12 +106,3 @@ class WorkflowSyncService(BaseSyncDBService):
         """Update a single workflow by ID."""
         lookup_conditions = {"workflow_id": workflow_id}
         return self.update_one(lookup_conditions, updated_data)
-
-    def convert_objectid_to_str(self, item):
-        if isinstance(item, dict):
-            for key, value in item.items():
-                if isinstance(value, ObjectId):
-                    item[key] = str(value)
-                elif isinstance(value, dict):
-                    item[key] = self.convert_objectid_to_str(value)
-        return item

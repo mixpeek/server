@@ -5,7 +5,7 @@ import time
 from config import services_url
 
 from _exceptions import InternalServerError, NotFoundError, BadRequestError
-from _utils import create_success_response, _send_post_request
+from utilities.methods import create_success_response, _send_post_request
 
 modality_to_content_types = {
     "text": [

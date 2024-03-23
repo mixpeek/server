@@ -1,19 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import Optional, List, Any, Dict
 from datetime import datetime
-from utilities.helpers import unique_name, generate_uuid
-
-
-class WorkflowResponse(BaseModel):
-    success: bool = Field(
-        ..., description="Whether the WorkflowInvokeResponse succeeded or failed."
-    )
-    status: int = Field(
-        ..., description="HTTP status code."
-    )
-    response: Optional[dict] = Field(None)
-    error: Optional[dict] = Field(None)
-    metadata: Optional[dict] = {}
+from utilities.helpers import unique_name, generate_uuid, current_time
 
 
 class QueryParamsSchema(BaseModel):
@@ -44,10 +32,15 @@ class WorkflowCreateRequest(BaseModel):
     settings: WorkflowSettings
     workflow_name: Optional[str] = Field(default_factory=unique_name)
     last_run: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: current_time())
 
 
-class WorkflowMinimalResponse(BaseModel):
+class WorkflowResponse(BaseModel):
     workflow_id: str
     workflow_name: Optional[str]
     created_at: datetime
     metadata: Optional[dict] = {}
+
+
+# class WorkflowInvokeResponse(BaseModel):
+#     response: dict

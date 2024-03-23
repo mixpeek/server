@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Body, Depends, Request
 from typing import Optional, List
 
-from _utils import create_success_response
+from server.src.api.utilities.methods import create_success_response
 from _exceptions import NotFoundError
 
 from .service import PipelineSyncService
