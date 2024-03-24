@@ -1,6 +1,8 @@
 import boto3
 from botocore.exceptions import ClientError
 
+from config import aws as creds
+
 
 class ECSContainerRunner:
     def __init__(self, cluster_name, task_definition, subnet_ids, security_group_ids):
@@ -8,7 +10,12 @@ class ECSContainerRunner:
         self.task_definition = task_definition
         self.subnet_ids = subnet_ids
         self.security_group_ids = security_group_ids
-        self.ecs_client = boto3.client("ecs")
+        self.session = boto3.Session(
+            aws_access_key_id=creds["aws_access_key"],
+            aws_secret_access_key=creds["aws_secret_key"],
+            region_name=creds["region"],
+        )
+        self.ecs_client = self.session.client("ecs")
 
     def run_container(self):
         try:
