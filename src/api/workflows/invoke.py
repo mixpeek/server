@@ -15,7 +15,7 @@ async def invoke_handler(serverless_name, run_id, websocket_id, request_paramete
         if not response.get("success"):
             raise BadRequestError(error=response.get("error"))
         else:
-            return create_success_response(response)
+            return response
 
     except Exception as e:
         raise BadRequestError(error=response.get("error"))
