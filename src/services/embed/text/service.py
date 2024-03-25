@@ -1,7 +1,9 @@
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel, logging
 import torch
 import torch.nn.functional as F
 import time
+
+logging.set_verbosity_error()
 
 
 class TextEmbeddingService:

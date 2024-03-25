@@ -60,4 +60,7 @@ docker push ghcr.io/mixpeek/mixpeek-api:latest
 
 from within api folder, start celery via:
 
-`celery -A db.service.celery_app worker --loglevel=info --concurrency 4`
+`celery -A db.service.celery_app worker --loglevel=info`
+
+`celery -A db.service.celery_app flower`
+

@@ -21,9 +21,7 @@ class EmbeddingHandler:
             resp = await _send_post_request(url, json.dumps(payload))
             return create_success_response(resp)
         except Exception as e:
-            raise InternalServerError(
-                error="There was an error with the request, reach out to support"
-            )
+            raise InternalServerError(error=e)
 
     async def get_configs(self):
         """

@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Body, Depends, Request
 from typing import Optional, List
+import json
+
+from rate_limiter import limiter
 
 from utilities.methods import create_success_response
 from _exceptions import route_exeception_handler, NotFoundError
@@ -72,17 +75,19 @@ Returns:
 
 # invoke pipeline
 @router.post("/{pipeline_id}")
+@limiter.limit("1/second")
 @route_exeception_handler
-async def invoke_pipeline(
-    request: Request,
-    pipeline_id: str,
-    payload: dict = Body(...),
-):
+async def invoke_pipeline(request: Request, pipeline_id: str):
+    payload = await request.json()
     pipeline_service = PipelineAsyncService(request.index_id)
     pipeline = await pipeline_service.get_one({"pipeline_id": pipeline_id})
 
     # if not pipeline:
     #     raise NotFoundError("Pipeline not found.")
+
+    # Check if payload is a string before trying to parse it as JSON
+    if isinstance(payload, str):
+        payload = json.loads(payload)
 
     task = process_pipeline.apply_async(
         kwargs={
@@ -92,7 +97,7 @@ async def invoke_pipeline(
         }
     )
 
-    return {"task_id": task.id}
+    return {"task_id": "task.id"}
 
 
 @router.get("/status/{task_id}")

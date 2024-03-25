@@ -7,6 +7,8 @@ from organization.service import OrganizationSyncService
 from parsers.service import ParseHandler
 from embed.service import EmbeddingHandler
 
+from pymongo import MongoClient
+
 
 async def process_orchestrator(index_id: str, pipeline: dict, payload: dict):
     pipeline_processor = PipelineProcessor(index_id, pipeline)
@@ -70,8 +72,13 @@ class PipelineProcessor:
     async def log_error_in_tasks_db(self, response):
         print(response)
 
-    async def insert_into_destination(self, obj):
-        print(obj)
+    def insert_into_destination(self, obj):
+        mongo_url = "mongodb+srv://sandbox:UT086Nt4m1V2DMRA@sandbox.mhsby.mongodb.net/"
+        db_name = "use_cases"
+        coll_name = "legal_case_embeddings"
+        mongo_client = MongoClient(mongo_url)
+        mongo_client[db_name][coll_name].insert_one(obj)
+        print("Inserted into destination collection")
 
     async def parse_file(self, file_url):
         parse_handler = ParseHandler(file_url)
@@ -100,7 +107,7 @@ class PipelineProcessor:
                 "embedding": embedding_response_content["response"]["embedding"],
                 "file_url": file_url,
             }
-            await self.insert_into_destination(obj)
+            self.insert_into_destination(obj)
 
     async def process(self, payload):
         file_url = payload["file_url"]

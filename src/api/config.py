@@ -34,4 +34,6 @@ unstructured_api_key = os.getenv("UNSTRUCTURED_API_KEY")
 unstructured_api_url = os.getenv("UNSTRUCTURED_API_URL")
 
 # local configs
-auth_off = os.getenv("AUTH_OFF", "False").lower() in ["true", "1"]
+server_env = os.getenv("SERVER_ENV")
+
+sentry_dsn = os.getenv("SENTRY_DSN")
