@@ -30,11 +30,8 @@ class PipelineAsyncService(BaseAsyncDBService):
 
 class PipelineProcessor:
     def __init__(self, index_id, pipeline: dict):
+        self.index_id = index_id
         self.pipeline = pipeline
-        # self.connection = None
-        # self.source = None
-        # self.destination = None
-        # self.change_handler = None
 
         """
             1. check if the connection exists in the organization
@@ -70,51 +67,31 @@ class PipelineProcessor:
     #     # Process the change
     #     pass
 
-    async def insert_into_destination(self, response):
-        print(response)
-
     async def log_error_in_tasks_db(self, response):
-        # Insert the response into the db
         print(response)
 
-    async def process(self, payload):
-        file_url = payload["file_url"]
+    async def insert_into_destination(self, obj):
+        print(obj)
+
+    async def parse_file(self, file_url):
         parse_handler = ParseHandler(file_url)
-
-        # parse the file
         parse_response = await parse_handler.parse(should_chunk=True)
-        parse_response_content = json.loads(parse_response.body.decode())
+        return json.loads(parse_response.body.decode())
 
-        if not parse_response_content.get("success"):
-            self.log_error_in_tasks_db(
-                {
-                    "task_id": "1",
-                    "status_code": parse_response_content["status"],
-                    "error": parse_response_content["message"],
-                }
-            )
-            # exit the function
-            return None
-
-        embed_handler = EmbeddingHandler()
-
-        chunks = parse_response_content["response"]["text"]
+    async def process_chunks(self, chunks, file_url):
+        embed_handler = EmbeddingHandler(model="jinaai/jina-embeddings-v2-base-en")
         for chunk in chunks:
-            # prepare object for db
-
-            # generate embedding
             embedding_response = await embed_handler.encode({"input": chunk["text"]})
             embedding_response_content = json.loads(embedding_response.body.decode())
 
             if not embedding_response_content.get("success"):
-                self.log_error_in_tasks_db(
+                await self.log_error_in_tasks_db(
                     {
                         "task_id": "1",
                         "status_code": embedding_response_content["status"],
                         "error": embedding_response_content["message"],
                     }
                 )
-                # skip this iteration
                 continue
 
             obj = {
@@ -123,6 +100,23 @@ class PipelineProcessor:
                 "embedding": embedding_response_content["response"]["embedding"],
                 "file_url": file_url,
             }
+            await self.insert_into_destination(obj)
 
-            # insert the object into the db
-            self.insert_into_destination(obj)
+    async def process(self, payload):
+        file_url = payload["file_url"]
+        parse_response_content = await self.parse_file(file_url)
+
+        if not parse_response_content.get("success"):
+            await self.log_error_in_tasks_db(
+                {
+                    "task_id": "1",
+                    "status_code": parse_response_content["status"],
+                    "error": parse_response_content["message"],
+                }
+            )
+            return None
+
+        await self.process_chunks(parse_response_content["response"]["text"], file_url)
+
+
+# Assuming ParseHandler and EmbeddingHandler are defined elsewhere and compatible with these changes.

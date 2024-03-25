@@ -15,9 +15,10 @@ class EmbeddingHandler:
 
     async def encode(self, data):
         url = f"{services_url}/embed/{self.modality}"
+        payload = {"model": self.model, **data}
         try:
             start_time = time.time() * 1000
-            resp = await _send_post_request(url, json.dumps(data))
+            resp = await _send_post_request(url, json.dumps(payload))
             return create_success_response(resp)
         except Exception as e:
             raise InternalServerError(
@@ -31,10 +32,10 @@ class EmbeddingHandler:
             model: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2"
         """
         url = f"{services_url}/embed/{self.modality}/config"
-        data = {"model": self.model, "modality": self.modality}
+        payload = {"model": self.model, "modality": self.modality}
         try:
             start_time = time.time() * 1000
-            resp = await _send_post_request(url, json.dumps(data))
+            resp = await _send_post_request(url, json.dumps(payload))
             return create_success_response(resp)
         except Exception as e:
             raise InternalServerError(
