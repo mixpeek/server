@@ -73,11 +73,6 @@ class PipelineProcessor:
         print(response)
 
     def insert_into_destination(self, obj):
-        mongo_url = "mongodb+srv://sandbox:UT086Nt4m1V2DMRA@sandbox.mhsby.mongodb.net/"
-        db_name = "use_cases"
-        coll_name = "legal_case_embeddings"
-        mongo_client = MongoClient(mongo_url)
-        mongo_client[db_name][coll_name].insert_one(obj)
         print("Inserted into destination collection")
 
     async def parse_file(self, file_url):

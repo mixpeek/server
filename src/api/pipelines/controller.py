@@ -97,7 +97,7 @@ async def invoke_pipeline(request: Request, pipeline_id: str):
         }
     )
 
-    return {"task_id": "task.id"}
+    return {"task_id": task.id}
 
 
 @router.get("/status/{task_id}")
