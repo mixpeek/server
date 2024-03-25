@@ -9,7 +9,7 @@ from utilities.methods import create_success_response, _send_post_request
 
 
 class EmbeddingHandler:
-    def __init__(self, modality, model):
+    def __init__(self, modality="text", model="sentence-transformers/all-MiniLM-L6-v2"):
         self.modality = modality
         self.model = model
 

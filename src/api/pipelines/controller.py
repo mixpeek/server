@@ -2,9 +2,10 @@ from fastapi import APIRouter, Body, Depends, Request
 from typing import Optional, List
 
 from utilities.methods import create_success_response
-from _exceptions import route_exeception_handler
+from _exceptions import route_exeception_handler, NotFoundError
 
 from .service import PipelineAsyncService
+from .tasks import process_pipeline
 
 router = APIRouter()
 
@@ -70,31 +71,73 @@ Returns:
 
 
 # invoke pipeline
-@router.post("/{provider}")
+@router.post("/{pipeline_id}")
 @route_exeception_handler
-async def invoke_pipeline(request: Request):
+async def invoke_pipeline(
+    request: Request,
+    pipeline_id: str,
+    payload: dict = Body(...),
+):
     pipeline_service = PipelineAsyncService(request.index_id)
-    payload = await request.json()
-    pipeline_service.process_payload(payload)
-    return create_success_response({"message": "Pipeline processed."})
+    pipeline = await pipeline_service.get_one({"pipeline_id": pipeline_id})
+
+    # if not pipeline:
+    #     raise NotFoundError("Pipeline not found.")
+
+    task = process_pipeline.apply_async(
+        kwargs={
+            "index_id": request.index_id,
+            "pipeline": pipeline,
+            "payload": payload,
+        }
+    )
+
+    return {"task_id": task.id}
 
 
-# create pipeline
-@router.post("/")
+@router.get("/status/{task_id}")
 @route_exeception_handler
-async def create_pipeline(request: Request):
-    return create_success_response({"message": "Pipeline created."})
+def task_status(request: Request, task_id: str):
+    """Query tasks status."""
+    task = process_pipeline.AsyncResult(task_id)
+    if task.state == "PENDING":
+        response = {
+            "state": task.state,
+            "status": "Pending...",
+        }
+    elif task.state == "FAILURE":
+        response = {
+            "state": task.state,
+            # "current": task.info.get("current", 0),
+            # "total": task.info.get("total", 1),
+            "status": "Failed...",
+        }
+    else:
+        response = {
+            "state": task.state,
+            # "current": 1,
+            # "total": 1,
+            "status": str(task.info),
+        }
+    return response
 
 
-# list pipelines
-@router.get("/")
-@route_exeception_handler
-async def list_pipelines(request: Request):
-    return create_success_response({"message": "Pipelines listed."})
+# # create pipeline
+# @router.post("/")
+# @route_exeception_handler
+# async def create_pipeline(request: Request):
+#     return create_success_response({"message": "Pipeline created."})
 
 
-# modify pipeline
-@router.put("/{pipeline_id}")
-@route_exeception_handler
-async def modify_pipeline(request: Request):
-    return create_success_response({"message": "Pipeline modified."})
+# # list pipelines
+# @router.get("/")
+# @route_exeception_handler
+# async def list_pipelines(request: Request):
+#     return create_success_response({"message": "Pipelines listed."})
+
+
+# # modify pipeline
+# @router.put("/{pipeline_id}")
+# @route_exeception_handler
+# async def modify_pipeline(request: Request):
+#     return create_success_response({"message": "Pipeline modified."})

@@ -54,3 +54,10 @@ docker run -p 8000:8000 mixpeek/mixpeek-api:latest
 docker tag mixpeek/mixpeek-api:latest ghcr.io/mixpeek/mixpeek-api:latest
 
 docker push ghcr.io/mixpeek/mixpeek-api:latest
+
+
+## celery
+
+from within api folder, start celery via:
+
+`celery -A db.service.celery_app worker --loglevel=info`

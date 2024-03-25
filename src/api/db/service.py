@@ -1,12 +1,13 @@
 from json import JSONEncoder
 from bson import ObjectId
 from bson.json_util import dumps
+from kombu.serialization import register
+
 from pymongo import MongoClient, ReturnDocument
 from motor.motor_asyncio import AsyncIOMotorClient
 from config import mongo_url, redis_url
 import json
 from utilities.helpers import current_time
-import pickle
 
 from celery import Celery
 
@@ -14,7 +15,7 @@ celery_app = Celery(
     "worker",
     broker=f"{redis_url}/0",
     backend=f"{redis_url}/1",
-    include=["pipeline.tasks"],
+    include=["pipelines.tasks"],
 )
 
 
@@ -28,6 +29,14 @@ class JSONEncoderCustom(JSONEncoder):
 def json_dumps(data):
     return dumps(data, cls=JSONEncoderCustom)
 
+
+register(
+    "json",
+    json_dumps,
+    json.loads,
+    content_type="application/json",
+    content_encoding="utf-8",
+)
 
 celery_app.conf.update(
     task_serializer="json",
