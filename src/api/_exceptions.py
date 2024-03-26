@@ -1,7 +1,6 @@
 from typing import Optional
 
 from functools import wraps
-from fastapi import HTTPException
 
 
 def route_exeception_handler(func):

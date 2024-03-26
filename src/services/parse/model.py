@@ -7,6 +7,15 @@ from _exceptions import BadRequestError
 class ParseFileRequest(BaseModel):
     file_url: Optional[str] = None
     contents: Optional[str] = None
+    should_chunk: Optional[bool] = True
+    clean_text: Optional[bool] = True
+
+    # unstructured library chunk specific parameters
+    # https://github.com/Unstructured-IO/unstructured/blob/main/unstructured/chunking/basic.py#L46
+    max_characters_per_chunk: Optional[int] = None
+    new_after_n_chars_per_chunk: Optional[int] = None
+    overlap_per_chunk: Optional[int] = None
+    overlap_all_per_chunk: Optional[bool] = None
 
     @validator("contents", pre=True, always=True)
     def check_file_data(cls, v, values, **kwargs):

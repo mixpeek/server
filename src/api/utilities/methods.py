@@ -37,10 +37,10 @@ def create_success_response(response: Optional[str]):
     return create_json_response(True, 200, None, response)
 
 
-async def _send_post_request(url, data):
+async def _send_post_request(url, data, timeout=None):
     try:
         start_time = time.time() * 1000
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=timeout) as client:
             response = await client.post(url, data=data)
 
         if response.status_code != 200:

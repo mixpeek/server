@@ -1,5 +1,22 @@
 from typing import Optional
 
+from functools import wraps
+
+
+def route_exeception_handler(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except BadRequestError as e:
+            raise BadRequestError(error=e.error)
+        except NotFoundError as e:
+            raise NotFoundError(error=e.error)
+        except InternalServerError as e:
+            raise InternalServerError(error=e.error)
+
+    return wrapper
+
 
 class APIError(Exception):
     def __init__(

@@ -14,6 +14,7 @@ modality_to_content_types = {
         "text/plain",
         "text/markdown",
         "text/html",
+        "text/html; charset=utf-8",
         "application/xml",
     ],
     "image": [
@@ -53,7 +54,6 @@ class ParseHandler:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.head(self.file_url)
-                print(response)
                 if response.status_code == 200:
                     content_type = response.headers.get("content-type")
                     if not content_type:
@@ -75,23 +75,35 @@ class ParseHandler:
                 return modality
         raise BadRequestError(f"Content type {content_type} not recognized")
 
-    async def parse(self, should_chunk=True):
+    async def parse(
+        self,
+        should_chunk=True,
+        clean_text=True,
+        max_characters_per_chunk=None,
+        new_after_n_chars_per_chunk=None,
+        overlap_per_chunk=None,
+        overlap_all_per_chunk=None,
+    ):
         content_type = await self._get_file_type()
         modality = self._get_modality(content_type)
 
-        url = f"{services_url}/parse/{modality}?should_chunk={str(should_chunk)}"
-        data = json.dumps({"file_url": self.file_url})
+        url = f"{services_url}/parse/{modality}"
+        data = json.dumps(
+            {
+                "file_url": self.file_url,
+                "should_chunk": should_chunk,
+                "clean_text": clean_text,
+                "max_characters_per_chunk": max_characters_per_chunk,
+                "new_after_n_chars_per_chunk": new_after_n_chars_per_chunk,
+                "overlap_per_chunk": overlap_per_chunk,
+                "overlap_all_per_chunk": overlap_all_per_chunk,
+            }
+        )
 
         try:
-            start_time = time.time() * 1000
-            resp = await _send_post_request(url, data)
+            resp = await _send_post_request(url, data, timeout=180)
             return create_success_response(resp)
         except Exception as e:
             raise InternalServerError(
                 error="There was an error with the request, reach out to support"
             )
-        #     return create_success_response(resp)
-        # except Exception as e:
-        #     raise InternalServerError(
-        #         error="There was an error with the request, reach out to support"
-        #     )
