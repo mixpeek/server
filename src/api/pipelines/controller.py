@@ -75,7 +75,7 @@ Returns:
 
 # invoke pipeline
 @router.post("/{pipeline_id}")
-@limiter.limit("1/second")
+@limiter.limit("10/minute")
 @route_exeception_handler
 async def invoke_pipeline(request: Request, pipeline_id: str):
     payload = await request.json()

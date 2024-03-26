@@ -95,3 +95,9 @@ class ModelResponseFormatValidationError(Exception):
         self.error = error
         self.suggestion = suggestion
         super().__init__(f"{self.error} Suggestion: {self.suggestion}")
+
+
+class StorageConnectionError(Exception):
+    """Exception raised for errors during storage connection."""
+
+    pass

@@ -1,6 +1,5 @@
 from _exceptions import NotFoundError
-
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import MongoClient
 from pydantic import BaseModel
 
 
@@ -55,29 +54,54 @@ from pydantic import BaseModel
     },
 }
 
-
-class MongoDBConnection(BaseModel):
-    host: str
-    port: str
-    username: str
-    password: str
-    database: str
-    collection: str
+from pydantic import BaseModel
 
 
-class MongoDBChangeHandler:
-    def __init__(self, connection: MongoDBConnection):
-        connection_string = f"mongodb://{connection.username}:{connection.password}@{connection.host}:{connection.port}"
-        self.user_client = AsyncIOMotorClient(connection_string)[connection.collection]
+class MongoDBHandler:
+    class ConnectionModel(BaseModel):
+        host: str
+        port: str
+        username: str
+        password: str
+        database: str
+        collection: str
 
-    def _on_insert(self):
-        pass
+    def connect(self):
+        connection_string = f"mongodb://{self.connection_info.username}:{self.connection_info.password}@{self.connection_info.host}:{self.connection_info.port}"
+        self.client = MongoClient(connection_string)[self.connection_info.database][
+            self.connection_info.collection
+        ]
 
-    def on_change(self, change_object):
-        if change_object["operationType"] == "insert":
-            return self._on_insert(change_object)
-        else:
-            raise NotFoundError("Operation type not found for MongoDB payload.")
+    def handle_payload(self, payload):
+        operation_type = payload.get("operationType")
+        document_key = payload.get("documentKey")
 
-    def perform_write(self):
-        pass
+        if operation_type == "insert":
+            self.insert(payload.get("fullDocument"))
+        elif operation_type == "delete":
+            self.delete(document_key)
+        elif operation_type == "update":
+            self.update(document_key, payload.get("updateDescription"))
+
+    def insert(self, data):
+        self.client.insert_one(data)
+
+    def delete(self, parent_id):
+        with self.client.start_session(causal_consistency=True) as session:
+            self.client.delete_many({"parent_id": parent_id}, session=session)
+
+
+# class MongoDBChangeHandler:
+#     def __init__(self, connection: MongoDBConnection):
+
+#     def _on_insert(self):
+#         pass
+
+#     def on_change(self, change_object):
+#         if change_object["operationType"] == "insert":
+#             return self._on_insert(change_object)
+#         else:
+#             raise NotFoundError("Operation type not found for MongoDB payload.")
+
+#     def perform_write(self):
+#         pass
