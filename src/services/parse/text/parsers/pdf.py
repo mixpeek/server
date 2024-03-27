@@ -5,14 +5,14 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import PPTXParams
+from ..model import PDFParams
 from _exceptions import InternalServerError
 
 
 class PDFParser(ParserInterface):
 
     def parse(
-        self, file_stream: BytesIO, params: PPTXParams
+        self, file_stream: BytesIO, params: PDFParams
     ) -> Union[List[Dict], str]:
         try:
             elements = partition_pdf(

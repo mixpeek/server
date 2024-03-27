@@ -11,7 +11,7 @@ class PartitionStrategy:
     HI_RES = "hi_res"
 
 
-class PPTXParams(ParseFileRequest):
+class PDFParams(ParseFileRequest):
     strategy: str = Field(
         default=PartitionStrategy.AUTO,
         description="""The strategy to use for partitioning the PDF. Valid strategies are "hi_res",
@@ -46,7 +46,7 @@ class CSVParams(ParseFileRequest):
     )
 
 
-class PPTXParams(ParseFileRequest):
+class PPTParams(ParseFileRequest):
     pass
 
 

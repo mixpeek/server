@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 from ..model import ParseFileRequest
-from .model import PPTXParams, HTMLParams, CSVParams, PPTXParams, XLSXParams
+from .model import PDFParams, HTMLParams, CSVParams, PPTParams, PPTXParams, XLSXParams
 from .parsers.base_parser import ParserInterface
 from .parsers.pdf import PDFParser
 from .parsers.html import HTMLParser
@@ -24,7 +24,7 @@ class ParserFactory:
             "csv": CSVParser(),
             "xlsx": XLSXParser(),
             "ppt": PPTParser(),
-            "pptx": PPTXParser()
+            "pptx": PPTXParser(),
         }
         parser = parsers.get(file_ext.lower())
         if not parser:
@@ -34,12 +34,12 @@ class ParserFactory:
     @staticmethod
     def get_param_model(file_ext: str) -> BaseModel:
         param_models = {
-            "pdf": PPTXParams,
+            "pdf": PDFParams,
             "html": HTMLParams,
             "csv": CSVParams,
             "xlsx": XLSXParams,
-            "ppt": PPTXParams,
-            "pptx": PPTXParams
+            "ppt": PPTParams,
+            "pptx": PPTXParams,
         }
         param_model = param_models.get(file_ext.lower())
         if not param_model:
