@@ -77,7 +77,6 @@ class GPT:
 
     def run(self):
         response_object = GenerationResponse(
-            created_at=current_time(),
             metadata=None,
             response={},
             error=None,
@@ -130,6 +129,7 @@ class GPT:
                 "total_tokens": gpt_json["usage"]["total_tokens"],
                 "generation_id": generate_uuid(),
                 "model": self.generation_request.model,
+                "created_at": current_time(),
             }
             response_object.status = 200
             response_object.success = True
