@@ -1,24 +1,18 @@
 from io import BytesIO
-from typing import Union, Dict, List, Optional
+from typing import Union, Dict, List
 from unstructured.partition.pdf import partition_pdf
 from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
+from ..model import PPTXParams
 from _exceptions import InternalServerError
 
 
 class PDFParser(ParserInterface):
 
     def parse(
-        self,
-        file_stream: BytesIO,
-        should_chunk: bool,
-        clean_text: bool,
-        max_characters_per_chunk: Optional[int] = None,
-        new_after_n_chars_per_chunk: Optional[int] = None,
-        overlap_per_chunk: Optional[int] = None,
-        overlap_all_per_chunk: Optional[int] = None,
+        self, file_stream: BytesIO, params: PPTXParams
     ) -> Union[List[Dict], str]:
         try:
             elements = partition_pdf(
@@ -26,20 +20,17 @@ class PDFParser(ParserInterface):
             )
             chunks = chunk_elements(
                 elements=elements,
-                max_characters=max_characters_per_chunk,
-                new_after_n_chars=new_after_n_chars_per_chunk,
-                overlap=overlap_per_chunk,
-                overlap_all=overlap_all_per_chunk,
+                max_characters=params.max_characters_per_chunk,
             )
             chunks_dict = [chunk.to_dict() for chunk in chunks]
 
-            if clean_text:
+            if params.clean_text:
                 chunks_dict = [
                     {**c, "text": self._clean_chunk_text(c["text"])}
                     for c in chunks_dict
                 ]
 
-            if should_chunk:
+            if params.should_chunk:
                 return chunks_dict
             else:
                 combined_text = " ".join([c["text"] for c in chunks_dict])

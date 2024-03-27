@@ -1,21 +1,20 @@
 from io import BytesIO
 from typing import Union, Dict, List
-from unstructured.partition.html import partition_html
+from unstructured.partition.xlsx import partition_xlsx
 from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import HTMLParams
+from ..model import XLSXParams
 from _exceptions import InternalServerError
 
 
-class HTMLParser(ParserInterface):
+class XLSXParser(ParserInterface):
 
-    def parse(self, file_stream: BytesIO, params: HTMLParams) -> Union[List[Dict], str]:
+    def parse(self, file_stream: BytesIO, params: XLSXParams) -> Union[List[Dict], str]:
         try:
-            elements = partition_html(
-                file=file_stream,
-                skip_headers_and_footers=params.skip_headers_and_footers,
+            elements = partition_xlsx(
+                file=file_stream, include_header=params.include_header
             )
             chunks = chunk_elements(
                 elements=elements,
@@ -37,7 +36,7 @@ class HTMLParser(ParserInterface):
 
         except Exception as e:
             raise InternalServerError(
-                error="Failed to parse HTML. Please try again. If the issue persists, contact support."
+                error="Failed to parse XLSX. Please try again. If the issue persists, contact support."
             )
 
     def _clean_chunk_text(self, text: str) -> str:

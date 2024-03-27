@@ -1,21 +1,20 @@
 from io import BytesIO
 from typing import Union, Dict, List
-from unstructured.partition.html import partition_html
+from unstructured.partition.pptx import partition_pptx
 from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import HTMLParams
+from ..model import PPTXParams
 from _exceptions import InternalServerError
 
 
-class HTMLParser(ParserInterface):
+class PPTXParser(ParserInterface):
 
-    def parse(self, file_stream: BytesIO, params: HTMLParams) -> Union[List[Dict], str]:
+    def parse(self, file_stream: BytesIO, params: PPTXParams) -> Union[List[Dict], str]:
         try:
-            elements = partition_html(
+            elements = partition_pptx(
                 file=file_stream,
-                skip_headers_and_footers=params.skip_headers_and_footers,
             )
             chunks = chunk_elements(
                 elements=elements,
@@ -37,7 +36,7 @@ class HTMLParser(ParserInterface):
 
         except Exception as e:
             raise InternalServerError(
-                error="Failed to parse HTML. Please try again. If the issue persists, contact support."
+                error="Failed to parse PPT. Please try again. If the issue persists, contact support."
             )
 
     def _clean_chunk_text(self, text: str) -> str:

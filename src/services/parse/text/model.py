@@ -1,41 +1,7 @@
-import base64
-from pydantic import BaseModel, Field, root_validator
-from typing import Optional, Union
-from _exceptions import BadRequestError
+from pydantic import Field
+from typing import Optional
 
-
-class ParseFileRequest(BaseModel):
-    # Common Parameters across Parsers
-    file_url: Optional[str] = Field(
-        default=None,
-        description="URL of the file to be parsed. Either 'file_url' or 'file_contents' must be provided, but not both.",
-    )
-    file_contents: Optional[Union[str, bytes]] = Field(
-        default=None,
-        description="Contents of the file to be parsed, provided directly. Can be a string or bytes. Either 'file_url' or 'file_contents' must be provided, but not both.",
-    )
-    should_chunk: Optional[bool] = True
-    clean_text: Optional[bool] = True
-    max_characters_per_chunk: Optional[int] = None
-
-    # Parser specific Parameters
-    class Config:
-        extra = "allow"
-
-    @root_validator(pre=True)
-    def check_mutually_exclusive_fields(cls, values):
-        file_url, file_contents = values.get("file_url"), values.get("file_contents")
-        if file_url and file_contents:
-            raise BadRequestError(
-                error={
-                    "message": "Only one of 'file_url' or 'contents' can be provided."
-                }
-            )
-        if not file_url and not file_contents:
-            raise BadRequestError(
-                error={"message": "Either 'file_url' or 'contents' must be provided."}
-            )
-        return values
+from parse.model import ParseFileRequest
 
 
 class PartitionStrategy:
@@ -45,7 +11,7 @@ class PartitionStrategy:
     HI_RES = "hi_res"
 
 
-class PDFParams(ParseFileRequest):
+class PPTXParams(ParseFileRequest):
     strategy: str = Field(
         default=PartitionStrategy.AUTO,
         description="""The strategy to use for partitioning the PDF. Valid strategies are "hi_res",
@@ -80,7 +46,11 @@ class CSVParams(ParseFileRequest):
     )
 
 
-class PPTParams(ParseFileRequest):
+class PPTXParams(ParseFileRequest):
+    pass
+
+
+class PPTXParams(ParseFileRequest):
     pass
 
 

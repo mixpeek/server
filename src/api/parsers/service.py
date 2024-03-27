@@ -1,20 +1,24 @@
 import httpx
 import json
-import time
 
 from config import services_url
 
+from .model import ParseFileRequest
 from _exceptions import InternalServerError, NotFoundError, BadRequestError
 from utilities.methods import create_success_response, _send_post_request
 
 modality_to_content_types = {
     "text": [
         "application/pdf",
+        "text/html",
+        "text/html; charset=utf-8",
+        "text/csv",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "text/plain",
         "text/markdown",
-        "text/html",
-        "text/html; charset=utf-8",
         "application/xml",
     ],
     "image": [
@@ -75,30 +79,12 @@ class ParseHandler:
                 return modality
         raise BadRequestError(f"Content type {content_type} not recognized")
 
-    async def parse(
-        self,
-        should_chunk=True,
-        clean_text=True,
-        max_characters_per_chunk=None,
-        new_after_n_chars_per_chunk=None,
-        overlap_per_chunk=None,
-        overlap_all_per_chunk=None,
-    ):
+    async def parse(self, parser_request: ParseFileRequest):
         content_type = await self._get_file_type()
         modality = self._get_modality(content_type)
 
         url = f"{services_url}/parse/{modality}"
-        data = json.dumps(
-            {
-                "file_url": self.file_url,
-                "should_chunk": should_chunk,
-                "clean_text": clean_text,
-                "max_characters_per_chunk": max_characters_per_chunk,
-                "new_after_n_chars_per_chunk": new_after_n_chars_per_chunk,
-                "overlap_per_chunk": overlap_per_chunk,
-                "overlap_all_per_chunk": overlap_all_per_chunk,
-            }
-        )
+        data = json.dumps({"file_url": self.file_url, **parser_request.model_dump()})
 
         try:
             resp = await _send_post_request(url, data, timeout=180)

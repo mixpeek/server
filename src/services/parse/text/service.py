@@ -1,12 +1,17 @@
+from pydantic import BaseModel
+
+from ..model import ParseFileRequest
+from .model import PPTXParams, HTMLParams, CSVParams, PPTXParams, XLSXParams
 from .parsers.base_parser import ParserInterface
 from .parsers.pdf import PDFParser
 from .parsers.html import HTMLParser
 from .parsers.csv import CSVParser
-from .parsers.excel import ExcelParser
+from .parsers.xlsx import XLSXParser
 from .parsers.ppt import PPTParser
+from .parsers.pptx import PPTXParser
 
 from io import BytesIO
-from typing import Optional, Union, List, Dict
+from typing import Union, List, Dict
 from _exceptions import BadRequestError
 
 
@@ -17,47 +22,44 @@ class ParserFactory:
             "pdf": PDFParser(),
             "html": HTMLParser(),
             "csv": CSVParser(),
-            "excel": ExcelParser(),
+            "xlsx": XLSXParser(),
             "ppt": PPTParser(),
+            "pptx": PPTXParser()
         }
         parser = parsers.get(file_ext.lower())
         if not parser:
             raise BadRequestError(error=f"Unsupported file type: {file_ext.lower()}")
         return parser
 
+    @staticmethod
+    def get_param_model(file_ext: str) -> BaseModel:
+        param_models = {
+            "pdf": PPTXParams,
+            "html": HTMLParams,
+            "csv": CSVParams,
+            "xlsx": XLSXParams,
+            "ppt": PPTXParams,
+            "pptx": PPTXParams
+        }
+        param_model = param_models.get(file_ext.lower())
+        if not param_model:
+            raise BadRequestError(error=f"Unsupported file type: {file_ext.lower()}")
+        return param_model
+
 
 class TextParsingService:
     def __init__(
-        self,
-        file_stream: BytesIO,
-        should_chunk: bool,
-        clean_text: bool,
-        metadata: dict,
-        max_characters_per_chunk: Optional[int] = None,
-        new_after_n_chars_per_chunk: Optional[int] = None,
-        overlap_per_chunk: Optional[int] = None,
-        overlap_all_per_chunk: Optional[int] = None,
+        self, file_stream: BytesIO, metadata: dict, parser_request: ParseFileRequest
     ):
         self.file_stream = file_stream
-        self.clean_text = clean_text
         self.file_ext = metadata["label"]
         self.metadata = metadata
-
-        # Chunking Specifc Optional Parameters
-        self.should_chunk = should_chunk
-        self.max_characters_per_chunk = max_characters_per_chunk
-        self.new_after_n_chars_per_chunk = new_after_n_chars_per_chunk
-        self.overlap_per_chunk = overlap_per_chunk
-        self.overlap_all_per_chunk = overlap_all_per_chunk
+        self.parser_request = parser_request
 
     async def parse(self) -> Union[List[Dict], str]:
         parser = ParserFactory.get_parser(self.file_ext)
+        param_model = ParserFactory.get_param_model(self.file_ext)
         return parser.parse(
             file_stream=self.file_stream,
-            should_chunk=self.should_chunk,
-            clean_text=self.clean_text,
-            max_characters_per_chunk=self.max_characters_per_chunk,
-            new_after_n_chars_per_chunk=self.new_after_n_chars_per_chunk,
-            overlap_per_chunk=self.overlap_per_chunk,
-            overlap_all_per_chunk=self.overlap_all_per_chunk,
+            params=param_model(**self.parser_request.model_dump()),
         )

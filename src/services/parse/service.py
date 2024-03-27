@@ -14,6 +14,9 @@ class ParseHandler:
     def __init__(self, file_url):
         self.file_url = file_url
 
+    """
+    Account for contents
+    """
     async def download_into_memory(self):
         try:
             async with httpx.AsyncClient() as client:
@@ -48,16 +51,7 @@ class ParseHandler:
                 error={"message": "Error occurred while detecting filetype"}
             )
 
-    async def parse(
-        self,
-        modality,
-        should_chunk=True,
-        clean_text=True,
-        max_characters_per_chunk=None,
-        new_after_n_chars_per_chunk=None,
-        overlap_per_chunk=None,
-        overlap_all_per_chunk=None,
-    ):
+    async def parse(self, modality, parser_request):
         contents, filename = await self.download_into_memory()
         stream = BytesIO(contents)
 
@@ -67,13 +61,8 @@ class ParseHandler:
         if modality == "text":
             text_service = TextParsingService(
                 file_stream=stream,
-                should_chunk=should_chunk,
-                clean_text=clean_text,
                 metadata=metadata,
-                max_characters_per_chunk=max_characters_per_chunk,
-                new_after_n_chars_per_chunk=new_after_n_chars_per_chunk,
-                overlap_per_chunk=overlap_per_chunk,
-                overlap_all_per_chunk=overlap_all_per_chunk,
+                parser_request=parser_request,
             )
             output = await text_service.parse()
         else:
