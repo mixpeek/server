@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import traceback
 
 
 from _exceptions import (
@@ -20,10 +21,9 @@ from slowapi.errors import RateLimitExceeded
 from api import api_router
 import sentry_sdk
 
+log = logging.getLogger(__name__)
 
-if server_env == "development":
-    log = logging.getLogger(__name__)
-else:  # prod
+if server_env != "development":
     sentry_sdk.init(
         dsn=sentry_dsn,
         # Set traces_sample_rate to 1.0 to capture 100%
@@ -46,6 +46,9 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 @app.exception_handler(InternalServerError)
 async def internal_server_exception_handler(request: Request, exc: InternalServerError):
+    # log it
+    traceback_str = traceback.format_exc()
+    log.exception(traceback_str)
     return create_json_response(exc.success, exc.status, exc.error, exc.response)
 
 

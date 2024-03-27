@@ -5,6 +5,7 @@ from typing import Optional
 import httpx
 from _exceptions import InternalServerError
 import time
+import pytz
 
 
 def generate_uuid(length=36, dashes=True):
@@ -16,7 +17,7 @@ def generate_uuid(length=36, dashes=True):
 
 
 def current_time():
-    return datetime.utcnow()
+    return datetime.now(pytz.UTC)
 
 
 def create_json_response(

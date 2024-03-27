@@ -103,8 +103,6 @@ class GPT:
             }
         ]
 
-        print(tools)
-
         start_time = time.time() * 1000
         try:
             response = client.chat.completions.create(
@@ -118,7 +116,6 @@ class GPT:
                 **settings,
             ).json()
             gpt_json = json.loads(response)
-            print(gpt_json)
             tool_output = gpt_json["choices"][0]["message"]["tool_calls"][0][
                 "function"
             ]["arguments"]
