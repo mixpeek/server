@@ -9,6 +9,7 @@ from _exceptions import route_exeception_handler, NotFoundError
 
 from .service import PipelineAsyncService
 from .tasks import process_pipeline
+from .model import PipelineCreateRequest, PipelineResponse
 
 router = APIRouter()
 
@@ -30,13 +31,14 @@ router = APIRouter()
 # pipelines collection
 {
     "enabled": True,
-    "storage": "mongodb",
+    "connection": {},
     "source": {
         "filters": {"status": "processing"},  # must match all of these
         "on_operation": ["insert"],
         "field": {
             "name": "file_url",
             "type": "url",  # vs inline
+            "settings": {},
             "embedding_model": "jinaai/jina-embeddings-v2-base-en",
         },
     },
@@ -75,7 +77,7 @@ Returns:
 
 # invoke pipeline
 @router.post("/{pipeline_id}")
-@limiter.limit("10/minute")
+@limiter.limit("1/second")
 @route_exeception_handler
 async def invoke_pipeline(request: Request, pipeline_id: str):
     payload = await request.json()
@@ -98,6 +100,18 @@ async def invoke_pipeline(request: Request, pipeline_id: str):
     )
 
     return {"task_id": task.id}
+
+
+# create pipeline
+@router.post("/", response_model=PipelineResponse)
+@route_exeception_handler
+async def create_pipeline(
+    request: Request,
+    connection_id: str,
+    pipeline_request: PipelineCreateRequest = Body(...),
+):
+    pipeline_service = PipelineAsyncService(request.index_id)
+    return await pipeline_service.create(pipeline_request, connection_id)
 
 
 @router.get("/status/{task_id}")
@@ -125,13 +139,6 @@ def task_status(request: Request, task_id: str):
             "status": str(task.info),
         }
     return response
-
-
-# # create pipeline
-# @router.post("/")
-# @route_exeception_handler
-# async def create_pipeline(request: Request):
-#     return create_success_response({"message": "Pipeline created."})
 
 
 # # list pipelines

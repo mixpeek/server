@@ -1,59 +1,75 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from datetime import datetime
-from utilities.helpers import unique_name
+from enum import Enum
+from typing import Optional, List
+from pydantic import BaseModel, Field
+
+from utilities.helpers import unique_name, generate_uuid
 from utilities.encryption import SecretCipher
 
-
-class ListenerStatus(BaseModel):
-    ACTIVE: bool = False
-    PROCESSING: int = 0
-    COMPLETED: int = 0
-    ERROR: int = 0
+from organization.model import Connection
 
 
-# class ConnectionType(str, Enum):
-#     mongodb = "mongodb"
-#     postgresql = "postgresql"
+# Enumerations
+class FieldType(str, Enum):
+    url = "url"
+    inline = "inline"
 
 
-class ConnectionInformation(BaseModel):
-    db: str
-    username: str
-    password: bytes
-    host: str
-    port: int
-
-    @property
-    def password(self):
-        return self._value
-
-    @password.setter
-    def password(self, new_value):
-        cipher = SecretCipher()
-        self._value = cipher.encrypt_string(new_value)
+class FieldSchema(BaseModel):
+    name: str
+    type: FieldType
+    embedding_model: Optional[str] = "sentence-transformers/all-MiniLM-L6-v2"
+    settings: Optional[dict] = {}
 
 
-class ListenerSchema(BaseModel):
+class SourceSchema(BaseModel):
+    filters: dict
+    on_operation: List[str]
+    field: FieldSchema
+
+
+class DestinationSchema(BaseModel):
+    collection: str
+    new_field_name: str
+    new_embeddings: str
+
+
+# Pipeline schema definition
+class PipelineSchema(BaseModel):
     index_id: str
     created_at: datetime
-    provider_id: str
-    code_as_string: str
-    listener_name: str
-    metadata: dict
-    # settings: ListenerSettings
-    status: ListenerStatus
+    last_run: Optional[datetime]
+    pipeline_id: str
+    enabled: bool
+    connection: Connection
+    source: SourceSchema
+    destination: DestinationSchema
 
 
-class ProviderInformation(BaseModel):
-    webhook_url: str
+# requests
+"""Requests"""
+
+
+# Pipeline schema definition
+class PipelineCreateRequest(BaseModel):
+    pipeline_id: str = Field(default_factory=lambda: generate_uuid(6, False))
+    connection: Optional[Connection]
+    source: SourceSchema
+    destination: DestinationSchema
     metadata: Optional[dict] = {}
+    enabled: bool = False
+    last_run: Optional[datetime] = None
 
 
-class ListenerCreateRequest(BaseModel):
-    provider_id: str
-    provider_information: ProviderInformation
-    code_as_string: str
-    listener_name: Optional[str] = Field(default_factory=unique_name)
+"""responses"""
+
+
+class PipelineResponse(BaseModel):
+    pipeline_id: str
+    created_at: datetime
+    last_run: Optional[datetime]
+    enabled: bool
+    connection: Connection
+    source: SourceSchema
+    destination: DestinationSchema
     metadata: Optional[dict] = {}
-    # settings: Optional[ListenerSettings] = {}

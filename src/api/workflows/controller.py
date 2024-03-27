@@ -20,9 +20,7 @@ router = APIRouter()
 @router.post("/", response_model=WorkflowResponse)
 @route_exeception_handler
 async def create_workflow(
-    request: Request,
-    workflow_request: WorkflowCreateRequest = Body(...),
-    pagination: PaginationParams = Depends(),
+    request: Request, workflow_request: WorkflowCreateRequest = Body(...)
 ):
     workflow_service = WorkflowSyncService(request.index_id)
     return workflow_service.create(workflow_request)

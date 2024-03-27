@@ -11,7 +11,29 @@ from pydantic import ValidationError
 from _exceptions import StorageConnectionError
 
 
-class StorageService:
+class StorageHandler:
+    """
+    A class used to handle storage operations.
+
+    ...
+
+    Attributes
+    ----------
+    connection_info : dict
+        a dictionary containing the connection information for the storage handler
+    storage_handlers : dict
+        a dictionary mapping storage handler names to their corresponding handler objects
+    storage_handler : object
+        the storage handler object for the specified db_handler
+
+    Methods
+    -------
+    connect_to_db():
+        Connects to the database using the specified storage handler.
+    write_to_db(data):
+        Writes the specified data to the database using the specified storage handler.
+    """
+
     def __init__(self, connection_info, db_handler):
         self.connection_info = connection_info
         self.storage_handlers = {

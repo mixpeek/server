@@ -1,20 +1,31 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import Optional, Union, cast
 
 from auth.service import get_index_id
 from db.model import PaginationParams
+from _exceptions import NotFoundError
 
 from .model import CreateOrgRequest, TrustedOrgResponse, OrganizationUpdateRequest
 from .service import OrganizationSyncService
 from fastapi import Request, Response, status
 
+from config import mixpeek_admin_token
+
 router = APIRouter()
 
 
 @router.post("/", include_in_schema=False)
-def create_organization(request: CreateOrgRequest):
+async def create_organization(request: Request, Authorization: str = Header(None)):
+    if Authorization != mixpeek_admin_token:
+        raise NotFoundError("Invalid admin token")
+
+    payload = await request.json()
+
+    if payload.get("user", {}).get("email", None) is None:
+        raise NotFoundError("Email is required")
+
     org_service = OrganizationSyncService()
-    return org_service.create_organization(email=request.email)
+    return org_service.create_organization(email=payload["user"]["email"])
 
 
 @router.put("/", response_model=TrustedOrgResponse, include_in_schema=False)

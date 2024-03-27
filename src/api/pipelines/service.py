@@ -1,13 +1,14 @@
 import json
 from db.service import BaseAsyncDBService, BaseSyncDBService
-from _exceptions import BadRequestError
+from _exceptions import BadRequestError, NotFoundError
 
 from organization.service import OrganizationSyncService
 
+from .model import PipelineCreateRequest
+
 from parsers.service import ParseHandler
 from embed.service import EmbeddingHandler
-
-from pymongo import MongoClient
+from storage.service import StorageHandler
 
 
 async def process_orchestrator(index_id: str, pipeline: dict, payload: dict):
@@ -20,14 +21,38 @@ class PipelineTaskSyncService(BaseSyncDBService):
         self.task_id = task_id
         super().__init__("pipeline_tasks", index_id)
 
-    def create(self, full_object: dict):
-        obj = {"task_id": self.task_id, "status": "PENDING", **full_object}
-        return self.create_one(obj)
+    def create(self, connection_id, pipeline_request):
+        pass
+        # # grab connection_id from the pipeline_request
+        # organization_service = OrganizationSyncService()
+        # organization = organization_service.get_organization(self.index_id)
+
+        # connection_information = organization.get("connections", None)
+        # if not connection_information:
+        #     raise NotFoundError("Connection information found")
+
+        # # make a connection request
+        # storage_handler = StorageHandler(connection_information, "mongodb")
+        # if not storage_handler.connect_to_db():
+        #     raise BadRequestError("Failed to connect to the database")
+
+        # new_pipeline = PipelineCreateRequest(
+        #     connection=connection_information,
+        #     source=pipeline_request.source
+        # )
+
+        # print(new_pipeline.model_dump())
+
+        # return self.create_one(obj)
 
 
 class PipelineAsyncService(BaseAsyncDBService):
     def __init__(self, index_id):
         super().__init__("pipelines", index_id)
+
+    async def create(self, full_object: dict):
+        resp = await self.create_one(full_object)
+        return resp
 
 
 class PipelineProcessor:

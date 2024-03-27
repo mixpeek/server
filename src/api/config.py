@@ -35,5 +35,6 @@ unstructured_api_url = os.getenv("UNSTRUCTURED_API_URL")
 
 # local configs
 server_env = os.getenv("SERVER_ENV")
-
 sentry_dsn = os.getenv("SENTRY_DSN")
+
+mixpeek_admin_token = os.getenv("MIXPEEK_ADMIN_TOKEN")
