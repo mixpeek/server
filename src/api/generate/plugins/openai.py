@@ -6,15 +6,15 @@ from config import openai_key
 import json
 import time
 
-from generate.models.model import GenerationRequest, GenerationResponse
+from generate.model import GenerationRequest, GenerationResponse
 from utilities.methods import generate_uuid, current_time
+
 from _exceptions import (
     JSONSchemaParsingError,
     ModelExecutionError,
     UnsupportedModelVersionError,
     ModelResponseFormatValidationError,
 )
-
 
 client = OpenAI(api_key=openai_key)
 

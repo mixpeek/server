@@ -1,5 +1,3 @@
-from generate.models.IModel import IModel
-from generate.models.model import GenerationRequest, GenerationResponse
 from _exceptions import (
     UnsupportedModelProviderError,
     UnsupportedModelVersionError,
@@ -11,12 +9,15 @@ from _exceptions import (
     InternalServerError,
 )
 
-from generate.plugins.openai import GPT
+from .plugins.openai import GPT
+from .model import GenerationRequest, GenerationResponse
 
 
+# Assuming GPT and other model classes have a common run method
+# and can be directly instantiated and called without needing an interface.
 class ModelHandler:
     @staticmethod
-    def model_factory(provider, *args, **kwargs) -> IModel:
+    def model_factory(provider, *args, **kwargs):
         if provider.lower() == "gpt":
             return GPT(*args, **kwargs)
         # TODO: Add other model types like LLaMA, etc
@@ -28,7 +29,7 @@ class ModelHandler:
 
 async def generate_orchestrator(request: GenerationRequest) -> GenerationResponse:
     try:
-        model_instance: IModel = ModelHandler.model_factory(
+        model_instance = ModelHandler.model_factory(
             request.model.provider,
             request,
         )
