@@ -1,5 +1,5 @@
-import base64
 from pydantic import BaseModel, Field, root_validator
+from fastapi import UploadFile
 from typing import Optional, Union
 from _exceptions import BadRequestError
 
@@ -10,9 +10,8 @@ class ParseFileRequest(BaseModel):
         default=None,
         description="URL of the file to be parsed. Either 'file_url' or 'file_contents' must be provided, but not both.",
     )
-    file_contents: Optional[Union[str, bytes]] = Field(
-        default=None,
-        description="Contents of the file to be parsed, provided directly. Can be a string or bytes. Either 'file_url' or 'file_contents' must be provided, but not both.",
+    file_contents: Optional[UploadFile] = (
+        None  # "Contents of the file to be parsed, provided directly. Can be a string or bytes. Either 'file_url' or 'file_contents' must be provided, but not both."
     )
     should_chunk: Optional[bool] = True
     clean_text: Optional[bool] = True
@@ -24,7 +23,9 @@ class ParseFileRequest(BaseModel):
 
     @root_validator(pre=True)
     def check_mutually_exclusive_fields(cls, values):
-        file_url, file_contents = values.get("file_url"), values.get("file_contents")
+        file_url, file_contents = values.get("file_url", None), values.get(
+            "file_contents", None
+        )
         if file_url and file_contents:
             raise BadRequestError(
                 error={
