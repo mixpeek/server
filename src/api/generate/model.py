@@ -47,6 +47,9 @@ class GenerationRequest(BaseModel):
 class Metadata(BaseModel):
     elapsed_time: Optional[float] = Field(...)
     total_tokens: Optional[int] = Field(...)
+    generation_id: Optional[str] = Field(...)
+    model: Optional[Model] = Field(...)
+    created_at: Optional[datetime] = Field(...)
 
 
 class GenerationResponse(BaseModel):
