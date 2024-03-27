@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, root_validator
-from fastapi import UploadFile
-from typing import Optional, Union
+from typing import Optional, Annotated
 from _exceptions import BadRequestError
 
 
@@ -8,10 +7,11 @@ class ParseFileRequest(BaseModel):
     # Common Parameters across Parsers
     file_url: Optional[str] = Field(
         default=None,
-        description="URL of the file to be parsed. Either 'file_url' or 'file_contents' must be provided, but not both.",
+        description="URL of the file to be parsed. Either 'file_url' or 'contents' must be provided, but not both."
     )
-    file_contents: Optional[UploadFile] = (
-        None  # "Contents of the file to be parsed, provided directly. Can be a string or bytes. Either 'file_url' or 'file_contents' must be provided, but not both."
+    contents: Optional[str] = Field(
+        default=None,
+        description="Either 'file_url' or 'contents' must be provided, but not both."
     )
     should_chunk: Optional[bool] = True
     clean_text: Optional[bool] = True
@@ -23,16 +23,16 @@ class ParseFileRequest(BaseModel):
 
     @root_validator(pre=True)
     def check_mutually_exclusive_fields(cls, values):
-        file_url, file_contents = values.get("file_url", None), values.get(
-            "file_contents", None
+        file_url, contents = values.get("file_url", None), values.get(
+            "contents", None
         )
-        if file_url and file_contents:
+        if file_url and contents:
             raise BadRequestError(
                 error={
                     "message": "Only one of 'file_url' or 'contents' can be provided."
                 }
             )
-        if not file_url and not file_contents:
+        if not file_url and not contents:
             raise BadRequestError(
                 error={"message": "Either 'file_url' or 'contents' must be provided."}
             )

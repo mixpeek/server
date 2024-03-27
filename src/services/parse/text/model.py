@@ -59,3 +59,7 @@ class XLSXParams(ParseFileRequest):
         default=False,
         description="Determines whether or not header info is included in text and medatada.text_as_html",
     )
+
+
+class TextParams(ParseFileRequest):
+    pass

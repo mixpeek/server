@@ -1,5 +1,6 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, File
 from _exceptions import route_exeception_handler
+from typing import Annotated
 
 
 from .model import ParseFileRequest
@@ -13,6 +14,5 @@ router = APIRouter()
 async def parse_file(
     parser_request: ParseFileRequest,
 ):
-    print(parser_request)
     parse_handler = ParseHandler(parser_request.file_url)
     return await parse_handler.parse(parser_request)

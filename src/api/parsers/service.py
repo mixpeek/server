@@ -13,6 +13,7 @@ modality_to_content_types = {
         "text/html",
         "text/html; charset=utf-8",
         "text/csv",
+        "text/plain",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.ms-powerpoint",
         "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -80,7 +81,7 @@ class ParseHandler:
         raise BadRequestError(f"Content type {content_type} not recognized")
 
     async def parse(self, parser_request: ParseFileRequest):
-        content_type = await self._get_file_type()
+        content_type = await self._get_file_type() if self.file_url else "text/plain"
         modality = self._get_modality(content_type)
 
         url = f"{services_url}/parse/{modality}"

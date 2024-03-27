@@ -17,6 +17,7 @@ class ParseHandler:
     """
     Account for contents
     """
+
     async def download_into_memory(self):
         try:
             async with httpx.AsyncClient() as client:
@@ -52,11 +53,17 @@ class ParseHandler:
             )
 
     async def parse(self, modality, parser_request):
-        contents, filename = await self.download_into_memory()
-        stream = BytesIO(contents)
+        stream = None
+        metadata = {}
+        if parser_request.contents:
+            metadata["label"] = "txt"
 
-        metadata = self.detect_filetype(stream.getvalue())
-        metadata.update({"filename": filename})
+        else:
+            contents, filename = await self.download_into_memory()
+            stream = BytesIO(contents)
+
+            metadata = self.detect_filetype(stream.getvalue())
+            metadata.update({"filename": filename})
 
         if modality == "text":
             text_service = TextParsingService(
