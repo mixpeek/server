@@ -95,13 +95,9 @@ class GenerationResponse(BaseModel):
         description="Optional field to capture any errors that occurred during the generation process.",
     )
     response: dict = Field(..., description="A generation object")
-    generation_id: str = Field(
-        ..., description="A unique identifier for the generation."
-    )
     created_at: datetime = Field(
         ..., description="The timestamp of when the generation was created."
     )
-    model: Model = Field(..., description="The model used for the generation.")
     metadata: Optional[Metadata] = Field(
         ..., description="Metadata object for the generation."
     )
