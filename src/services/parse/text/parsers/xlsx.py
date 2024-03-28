@@ -5,16 +5,19 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import XLSXParams
+from model import ParseFileRequest
 from _exceptions import InternalServerError
 
 
 class XLSXParser(ParserInterface):
 
-    def parse(self, file_stream: BytesIO, params: XLSXParams) -> Union[List[Dict], str]:
+    def parse(
+        self, file_stream: BytesIO, params: ParseFileRequest
+    ) -> Union[List[Dict], str]:
         try:
             elements = partition_xlsx(
-                file=file_stream, include_header=params.include_header
+                file=file_stream,
+                **params.xlsx_settings
             )
             chunks = chunk_elements(
                 elements=elements,

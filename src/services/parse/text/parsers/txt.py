@@ -5,17 +5,17 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import TextParams
+from model import ParseFileRequest
 from _exceptions import InternalServerError
 
 
 class TextParser(ParserInterface):
 
-    def parse(self, file_stream: BytesIO, params: TextParams) -> Union[List[Dict], str]:
+    def parse(
+        self, file_stream: BytesIO, params: ParseFileRequest
+    ) -> Union[List[Dict], str]:
         try:
-            elements = partition_text(
-                text=params.contents,
-            )
+            elements = partition_text(file=file_stream, **params.txt_settings)
             chunks = chunk_elements(
                 elements=elements,
                 max_characters=params.max_characters_per_chunk,

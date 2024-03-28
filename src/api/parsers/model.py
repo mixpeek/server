@@ -1,42 +1,6 @@
 from pydantic import BaseModel, Field, root_validator
-from typing import Optional, Annotated
+from typing import Optional
 from _exceptions import BadRequestError
-
-
-class ParseFileRequest(BaseModel):
-    # Common Parameters across Parsers
-    file_url: Optional[str] = Field(
-        default=None,
-        description="URL of the file to be parsed. Either 'file_url' or 'contents' must be provided, but not both."
-    )
-    contents: Optional[str] = Field(
-        default=None,
-        description="Either 'file_url' or 'contents' must be provided, but not both."
-    )
-    should_chunk: Optional[bool] = True
-    clean_text: Optional[bool] = True
-    max_characters_per_chunk: Optional[int] = None
-
-    # Parser specific Parameters
-    class Config:
-        extra = "allow"
-
-    @root_validator(pre=True)
-    def check_mutually_exclusive_fields(cls, values):
-        file_url, contents = values.get("file_url", None), values.get(
-            "contents", None
-        )
-        if file_url and contents:
-            raise BadRequestError(
-                error={
-                    "message": "Only one of 'file_url' or 'contents' can be provided."
-                }
-            )
-        if not file_url and not contents:
-            raise BadRequestError(
-                error={"message": "Either 'file_url' or 'contents' must be provided."}
-            )
-        return values
 
 
 class PartitionStrategy:
@@ -46,7 +10,7 @@ class PartitionStrategy:
     HI_RES = "hi_res"
 
 
-class PDFParams(ParseFileRequest):
+class PDFParams(BaseModel):
     strategy: str = Field(
         default=PartitionStrategy.AUTO,
         description="""The strategy to use for partitioning the PDF. Valid strategies are "hi_res",
@@ -67,26 +31,73 @@ class PDFParams(ParseFileRequest):
     )
 
 
-class HTMLParams(ParseFileRequest):
+class HTMLParams(BaseModel):
     skip_headers_and_footers: Optional[bool] = Field(
         default=False,
         description="If True, ignores any content that is within <header> or <footer> tags",
     )
 
 
-class CSVParams(ParseFileRequest):
+class CSVParams(BaseModel):
     include_header: Optional[bool] = Field(
         default=False,
         description="Determines whether or not header info is included in text and medatada.text_as_html",
     )
 
 
-class PPTParams(ParseFileRequest):
+class PPTParams(BaseModel):
     pass
 
 
-class XLSXParams(ParseFileRequest):
+class PPTXParams(BaseModel):
+    pass
+
+
+class XLSXParams(BaseModel):
     include_header: Optional[bool] = Field(
         default=False,
         description="Determines whether or not header info is included in text and medatada.text_as_html",
     )
+
+
+class TXTParams(BaseModel):
+    pass
+
+
+class ParseFileRequest(BaseModel):
+    # Common Settings across Parsers
+    file_url: Optional[str] = Field(
+        default=None,
+        description="URL of the file to be parsed. Either 'file_url' or 'contents' must be provided, but not both.",
+    )
+    contents: Optional[str] = Field(
+        default=None,
+        description="Either 'file_url' or 'contents' must be provided, but not both.",
+    )
+    should_chunk: Optional[bool] = True
+    clean_text: Optional[bool] = True
+    max_characters_per_chunk: Optional[int] = None
+
+    # Parser Specific Settings
+    pdf_settings: Optional[PDFParams]
+    html_settings: Optional[HTMLParams]
+    csv_settings: Optional[CSVParams]
+    ppt_settings: Optional[PPTParams]
+    pptx_settings: Optional[PPTXParams]
+    xlsx_settings: Optional[XLSXParams]
+    txt_settings: Optional[TXTParams]
+
+    @root_validator(pre=True)
+    def check_mutually_exclusive_fields(cls, values):
+        file_url, contents = values.get("file_url", None), values.get("contents", None)
+        if file_url and contents:
+            raise BadRequestError(
+                error={
+                    "message": "Only one of 'file_url' or 'contents' can be provided."
+                }
+            )
+        if not file_url and not contents:
+            raise BadRequestError(
+                error={"message": "Either 'file_url' or 'contents' must be provided."}
+            )
+        return values

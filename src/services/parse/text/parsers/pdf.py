@@ -5,18 +5,19 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import PDFParams
+from model import ParseFileRequest
 from _exceptions import InternalServerError
 
 
 class PDFParser(ParserInterface):
 
     def parse(
-        self, file_stream: BytesIO, params: PDFParams
+        self, file_stream: BytesIO, params: ParseFileRequest
     ) -> Union[List[Dict], str]:
         try:
             elements = partition_pdf(
                 file=file_stream,
+                **params.pdf_settings
             )
             chunks = chunk_elements(
                 elements=elements,

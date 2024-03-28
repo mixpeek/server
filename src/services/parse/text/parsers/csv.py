@@ -5,16 +5,19 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import CSVParams
+from model import ParseFileRequest
 from _exceptions import InternalServerError
 
 
 class CSVParser(ParserInterface):
 
-    def parse(self, file_stream: BytesIO, params: CSVParams) -> Union[List[Dict], str]:
+    def parse(
+        self, file_stream: BytesIO, params: ParseFileRequest
+    ) -> Union[List[Dict], str]:
         try:
             elements = partition_csv(
-                file=file_stream, include_header=params.include_header
+                file=file_stream,
+                **params.csv_settings
             )
             chunks = chunk_elements(
                 elements=elements,
