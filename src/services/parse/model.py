@@ -1,19 +1,23 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from typing import Optional
-from _exceptions import BadRequestError
 
 
 class ParseFileRequest(BaseModel):
-    # Common Parameters across Parsers
+    # Common Settings across Parsers
     file_url: Optional[str] = (
-        None  # This should be a Union (either file_url or contents)
+        None
     )
     contents: Optional[str] = None
     should_chunk: Optional[bool] = True
     clean_text: Optional[bool] = True
     max_characters_per_chunk: Optional[int] = None
 
-    # Parser specific Parameters
-    # Defined in <modality>/parsers/model.py e.g. text/parsers/model.py
-    class Config:
-        extra = "allow"
+    # Parser Specific Settings
+    # Models defined in api/parsers/model.py
+    pdf_settings: Optional[dict] = {}
+    html_settings: Optional[dict] = {}
+    csv_settings: Optional[dict] = {}
+    ppt_settings: Optional[dict] = {}
+    pptx_settings: Optional[dict] = {}
+    xlsx_settings: Optional[dict] = {}
+    txt_settings: Optional[dict] = {}

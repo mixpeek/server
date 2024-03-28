@@ -5,17 +5,19 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from ..model import HTMLParams
+from parse.model import ParseFileRequest
 from _exceptions import InternalServerError
 
 
 class HTMLParser(ParserInterface):
 
-    def parse(self, file_stream: BytesIO, params: HTMLParams) -> Union[List[Dict], str]:
+    def parse(
+        self, file_stream: BytesIO, params: ParseFileRequest
+    ) -> Union[List[Dict], str]:
         try:
             elements = partition_html(
                 file=file_stream,
-                skip_headers_and_footers=params.skip_headers_and_footers,
+                **params.html_settings,
             )
             chunks = chunk_elements(
                 elements=elements,

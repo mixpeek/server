@@ -1,10 +1,9 @@
-from fastapi import APIRouter, File
+from fastapi import APIRouter
 from _exceptions import route_exeception_handler
-from typing import Annotated
-
 
 from .model import ParseFileRequest
 from .service import ParseHandler
+
 
 router = APIRouter()
 

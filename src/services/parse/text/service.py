@@ -1,7 +1,4 @@
-from pydantic import BaseModel
-
 from ..model import ParseFileRequest
-from .model import PDFParams, HTMLParams, CSVParams, PPTParams, PPTXParams, XLSXParams, TextParams
 from .parsers.base_parser import ParserInterface
 from .parsers.pdf import PDFParser
 from .parsers.html import HTMLParser
@@ -33,22 +30,6 @@ class ParserFactory:
             raise BadRequestError(error=f"Unsupported file type: {file_ext.lower()}")
         return parser
 
-    @staticmethod
-    def get_param_model(file_ext: str) -> BaseModel:
-        param_models = {
-            "pdf": PDFParams,
-            "html": HTMLParams,
-            "csv": CSVParams,
-            "xlsx": XLSXParams,
-            "ppt": PPTParams,
-            "pptx": PPTXParams,
-            "txt": TextParams,
-        }
-        param_model = param_models.get(file_ext.lower())
-        if not param_model:
-            raise BadRequestError(error=f"Unsupported file type: {file_ext.lower()}")
-        return param_model
-
 
 class TextParsingService:
     def __init__(
@@ -61,8 +42,7 @@ class TextParsingService:
 
     async def parse(self) -> Union[List[Dict], str]:
         parser = ParserFactory.get_parser(self.file_ext)
-        param_model = ParserFactory.get_param_model(self.file_ext)
         return parser.parse(
             file_stream=self.file_stream,
-            params=param_model(**self.parser_request.model_dump()),
+            params=self.parser_request,
         )

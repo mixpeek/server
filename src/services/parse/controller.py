@@ -14,5 +14,5 @@ async def parse_file(
     modality: str,
     parser_request: ParseFileRequest,
 ):
-    parse_handler = ParseHandler(parser_request.file_url)
+    parse_handler = ParseHandler(parser_request.file_url, parser_request.contents)
     return await parse_handler.parse(modality=modality, parser_request=parser_request)
