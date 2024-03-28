@@ -16,7 +16,7 @@ class PricingTier(str, Enum):
     enterprise = "enterprise"
 
 
-class ConnectionType(str, Enum):
+class ConnectionEngine(str, Enum):
     mongodb = "mongodb"
     postgresql = "postgresql"
 
@@ -57,31 +57,38 @@ class ApiKey(BaseModel):
 
 
 class Connection(BaseModel):
-    type: ConnectionType
+    engine: ConnectionEngine
     host: str
     port: int = None
     database: str
     username: str
-    password: Secret = None
-    extra_params: Optional[dict] = (
-        None  # For any additional parameters specific to database
-    )
+    password: bytes
+    extra_params: Optional[dict] = None
+
+    @property
+    def password(self):
+        cipher = SecretCipher()
+        return cipher.decrypt_string(self.password)
+
+    @password.setter
+    def password(self, new_value):
+        cipher = SecretCipher()
+        self.password = cipher.encrypt_string(new_value)
 
     # Validate the port based on the type of database
     @validator("port", always=True)
     def set_default_port(cls, v, values):
-        if "type" in values:
-            if values["type"] == ConnectionType.mongodb and v is None:
+        if "engine" in values:
+            if values["engine"] == ConnectionEngine.mongodb and v is None:
                 return 27017
-            elif values["type"] == ConnectionType.postgresql and v is None:
-                return 5432
+
         return v
 
     # Example of how you might validate extra parameters for a specific database type, if necessary
     @validator("extra_params", always=True)
     def validate_extra_params(cls, v, values):
-        if "type" in values:
-            if values["type"] == ConnectionType.mongodb:
+        if "engine" in values:
+            if values["engine"] == ConnectionEngine.mongodb:
                 # MongoDB specific validation can go here
                 pass
         return v

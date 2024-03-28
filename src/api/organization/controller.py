@@ -5,7 +5,12 @@ from auth.service import get_index_id
 from db.model import PaginationParams
 from _exceptions import NotFoundError
 
-from .model import CreateOrgRequest, TrustedOrgResponse, OrganizationUpdateRequest
+from .model import (
+    CreateOrgRequest,
+    TrustedOrgResponse,
+    OrganizationUpdateRequest,
+    OrganizationBase,
+)
 from .service import OrganizationSyncService
 from fastapi import Request, Response, status
 
@@ -33,11 +38,11 @@ def update_organization(
     updates: OrganizationUpdateRequest, index_id: str = Depends(get_index_id)
 ):
     service = OrganizationSyncService()
-    updates_dict = updates.dict(exclude_unset=True)
+    updates_dict = updates.model_dump(exclude_unset=True)
     return service.update_organization(index_id, updates_dict)
 
 
-@router.get("/", response_model=TrustedOrgResponse, include_in_schema=False)
+@router.get("/", response_model=OrganizationBase, include_in_schema=False)
 def get_organization(index_id: str = Depends(get_index_id)):
     service = OrganizationSyncService()
     return service.get_organization(index_id)

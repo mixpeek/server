@@ -7,14 +7,7 @@ from utilities.encryption import SecretCipher
 from db.service import sync_db, mongo_client, BaseSyncDBService
 from pymongo import ReturnDocument
 from fastapi import HTTPException
-from .model import (
-    OrganizationBase,
-    User,
-    UsagePricing,
-    Permissions,
-    ApiKey,
-    TrustedOrgResponse,
-)
+from .model import OrganizationBase, User, UsagePricing, Permissions, ApiKey
 
 
 class OrganizationSyncService:
@@ -65,7 +58,7 @@ class OrganizationSyncService:
         if not response:
             raise HTTPException(status_code=400, detail="Organization not found")
 
-        return TrustedOrgResponse(**response)
+        return response
 
     def update_organization(self, index_id, updated_data):
         # Find the organization by its ID
