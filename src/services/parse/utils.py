@@ -6,7 +6,7 @@ def get_filename_from_cd(cd):
     """
     Extract filename from content-disposition header if available.
     """
-    if not cd:
+    if not cd or "filename=" not in cd:
         return None
     fname = cd.split("filename=")[1]
     if fname.lower().startswith(("'", '"')):

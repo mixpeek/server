@@ -1,42 +1,7 @@
-from pydantic import BaseModel, Field, root_validator
-from typing import Optional, Annotated
-from _exceptions import BadRequestError
+from pydantic import Field
+from typing import Optional
 
-
-class ParseFileRequest(BaseModel):
-    # Common Parameters across Parsers
-    file_url: Optional[str] = Field(
-        default=None,
-        description="URL of the file to be parsed. Either 'file_url' or 'contents' must be provided, but not both."
-    )
-    contents: Optional[str] = Field(
-        default=None,
-        description="Either 'file_url' or 'contents' must be provided, but not both."
-    )
-    should_chunk: Optional[bool] = True
-    clean_text: Optional[bool] = True
-    max_characters_per_chunk: Optional[int] = None
-
-    # Parser specific Parameters
-    class Config:
-        extra = "allow"
-
-    @root_validator(pre=True)
-    def check_mutually_exclusive_fields(cls, values):
-        file_url, contents = values.get("file_url", None), values.get(
-            "contents", None
-        )
-        if file_url and contents:
-            raise BadRequestError(
-                error={
-                    "message": "Only one of 'file_url' or 'contents' can be provided."
-                }
-            )
-        if not file_url and not contents:
-            raise BadRequestError(
-                error={"message": "Either 'file_url' or 'contents' must be provided."}
-            )
-        return values
+from parse.model import ParseFileRequest
 
 
 class PartitionStrategy:
@@ -85,8 +50,16 @@ class PPTParams(ParseFileRequest):
     pass
 
 
+class PPTXParams(ParseFileRequest):
+    pass
+
+
 class XLSXParams(ParseFileRequest):
     include_header: Optional[bool] = Field(
         default=False,
         description="Determines whether or not header info is included in text and medatada.text_as_html",
     )
+
+
+class TextParams(ParseFileRequest):
+    pass
