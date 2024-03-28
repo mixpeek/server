@@ -20,3 +20,4 @@ class ParseFileRequest(BaseModel):
     ppt_settings: Optional[dict] = {}
     pptx_settings: Optional[dict] = {}
     xlsx_settings: Optional[dict] = {}
+    txt_settings: Optional[dict] = {}

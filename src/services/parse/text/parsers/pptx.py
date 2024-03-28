@@ -5,7 +5,7 @@ from unstructured.chunking.basic import chunk_elements
 from unstructured.cleaners.core import clean
 
 from .base_parser import ParserInterface
-from model import ParseFileRequest
+from parse.model import ParseFileRequest
 from _exceptions import InternalServerError
 
 

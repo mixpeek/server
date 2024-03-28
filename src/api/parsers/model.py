@@ -79,13 +79,13 @@ class ParseFileRequest(BaseModel):
     max_characters_per_chunk: Optional[int] = None
 
     # Parser Specific Settings
-    pdf_settings: Optional[PDFParams]
-    html_settings: Optional[HTMLParams]
-    csv_settings: Optional[CSVParams]
-    ppt_settings: Optional[PPTParams]
-    pptx_settings: Optional[PPTXParams]
-    xlsx_settings: Optional[XLSXParams]
-    txt_settings: Optional[TXTParams]
+    pdf_settings: Optional[PDFParams] = {}
+    html_settings: Optional[HTMLParams] = {}
+    csv_settings: Optional[CSVParams] = {}
+    ppt_settings: Optional[PPTParams] = {}
+    pptx_settings: Optional[PPTXParams] = {}
+    xlsx_settings: Optional[XLSXParams] = {}
+    txt_settings: Optional[TXTParams] = {}
 
     @root_validator(pre=True)
     def check_mutually_exclusive_fields(cls, values):

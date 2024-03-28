@@ -42,7 +42,6 @@ class TextParsingService:
 
     async def parse(self) -> Union[List[Dict], str]:
         parser = ParserFactory.get_parser(self.file_ext)
-        param_model = ParserFactory.get_param_model(self.file_ext)
         return parser.parse(
             file_stream=self.file_stream,
             params=self.parser_request,

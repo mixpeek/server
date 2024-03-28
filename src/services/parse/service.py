@@ -5,7 +5,7 @@ from magika import Magika
 from .utils import generate_filename_from_url, get_filename_from_cd
 from .text.service import TextParsingService
 
-from model import ParseFileRequest
+from .model import ParseFileRequest
 
 from _exceptions import BadRequestError
 from _utils import create_success_response
@@ -36,7 +36,7 @@ class ParseHandler:
             raise BadRequestError(error={"message": "Error downloading file"})
 
     def download_text_to_memory(self):
-        return self.contents.encode("utf-8")
+        return self.contents.encode("utf-8"), ""
 
     def detect_filetype(self, contents):
         try:
